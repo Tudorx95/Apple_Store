@@ -1,0 +1,14 @@
+/* src/assets/css/Loading.css */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full screen */
+    background-color: rgba(0, 0, 0); 
+  }
+  
+  .loading-image {
+    width: 200px; /* Adjust the size as needed */
+    height: 200px;
+  }
+  

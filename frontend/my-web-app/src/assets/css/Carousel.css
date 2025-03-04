@@ -1,0 +1,24 @@
+.carousel {
+  display: flex;
+  overflow: hidden;
+  gap: 10px;
+  padding: 20px;
+}
+
+/* For carousel images*/
+.carousel-item {
+  min-width: 200px;
+  max-width: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f4f4;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}

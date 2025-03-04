@@ -1,0 +1,138 @@
+CREATE DATABASE AppleStore;
+USE AppleStore;
+
+-- Device Type Table
+CREATE TABLE Device_Type (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    device_type VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Device Specs Table
+CREATE TABLE Device_Specs (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    display_specs VARCHAR(255) NOT NULL,
+    promotion_display BOOLEAN DEFAULT FALSE,
+    material VARCHAR(100) NOT NULL,
+    button_specs VARCHAR(255),
+    front_camera VARCHAR(255),
+    CPU VARCHAR(255) NOT NULL,
+    GPU VARCHAR(255),  -- Nullable since it's for PC/Macbook only
+    back_camera VARCHAR(255),
+    battery_life INT,  -- Battery life in hours
+    security ENUM('Face ID', 'Touch ID') NOT NULL,
+    wifi_tech ENUM('5G', '4G') NOT NULL
+);
+
+-- Device Table
+CREATE TABLE Device (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    device_type INT NOT NULL,
+    model VARCHAR(100) NOT NULL,
+    color VARCHAR(50),
+    specs INT,  -- References Device_Specs
+    price DECIMAL(10,2) NOT NULL,
+    capacity VARCHAR(50),
+    weight DECIMAL(5,2),  -- Weight in kg
+    keyboard_layout VARCHAR(50),
+
+    FOREIGN KEY (device_type) REFERENCES Device_Type(ID) ON DELETE CASCADE,
+    FOREIGN KEY (specs) REFERENCES Device_Specs(ID) ON DELETE SET NULL
+);
+
+
+INSERT INTO Device_Type (device_type) VALUES
+('iPhone'),
+('iPad'),
+('MacBook');
+
+INSERT INTO Device_Specs (display_specs, promotion_display, material, button_specs, front_camera, CPU, GPU, back_camera, battery_life, security, wifi_tech)
+VALUES
+-- iPhone 15 Pro Max
+('6.7-inch OLED, 2796x1290', TRUE, 'Titanium', 'No Home Button', '12MP', 'A17 Pro Chip', NULL, '48MP (5x Zoom)', 29, 'Face ID', '5G'),
+
+-- iPad Pro 12.9-inch
+('12.9-inch Liquid Retina XDR, 2732x2048', TRUE, 'Aluminum', 'No Home Button', '12MP', 'M2 Chip', NULL, '12MP Ultra Wide', 10, 'Face ID', '5G'),
+
+-- MacBook Air M2 15-inch
+('15.3-inch Liquid Retina, 2880x1864', FALSE, 'Aluminum', 'Touch ID Button', '1080p', 'M2 Chip', '10-core GPU', NULL, 18, 'Touch ID', 'Wi-Fi 6');
+
+
+INSERT INTO Device (device_type, model, color, specs, price, capacity, weight, keyboard_layout)
+VALUES
+-- iPhone 15 Pro Max
+( (SELECT ID FROM Device_Type WHERE device_type = 'iPhone'), 'iPhone 15 Pro Max', 'Natural Titanium', 
+  (SELECT ID FROM Device_Specs WHERE CPU = 'A17 Pro Chip'), 1199.99, '256GB', 0.221, 'QWERTY'),
+
+-- iPad Pro 12.9
+( (SELECT ID FROM Device_Type WHERE device_type = 'iPad'), 'iPad Pro 12.9', 'Silver', 
+  (SELECT ID FROM Device_Specs WHERE CPU = 'M2 Chip' AND display_specs LIKE '12.9%'), 1299.99, '512GB', 0.682, 'QWERTY'),
+
+-- MacBook Air M2 15-inch
+( (SELECT ID FROM Device_Type WHERE device_type = 'MacBook'), 'MacBook Air M2 15-inch', 'Midnight', 
+  (SELECT ID FROM Device_Specs WHERE CPU = 'M2 Chip' AND GPU = '10-core GPU'), 1499.99, '1TB', 1.51, 'QWERTY');
+
+
+INSERT INTO Device_Specs (display_specs, promotion_display, material, button_specs, front_camera, CPU, GPU, back_camera, battery_life, security, wifi_tech)
+VALUES
+-- iPhone SE (2022)
+('4.7-inch Retina HD, 1334x750', FALSE, 'Aluminum', 'Home Button', '7MP', 'A15 Bionic Chip', NULL, '12MP Wide', 15, 'Touch ID', '5G'),
+
+-- iPhone 15
+('6.1-inch OLED, 2556x1179', TRUE, 'Aluminum', 'No Home Button', '12MP', 'A16 Bionic Chip', NULL, '48MP (2x Zoom)', 20, 'Face ID', '5G'),
+
+-- iPhone 15 Plus
+('6.7-inch OLED, 2796x1290', TRUE, 'Aluminum', 'No Home Button', '12MP', 'A16 Bionic Chip', NULL, '48MP (2x Zoom)', 26, 'Face ID', '5G'),
+
+-- iPhone 14
+('6.1-inch OLED, 2532x1170', TRUE, 'Aluminum', 'No Home Button', '12MP', 'A15 Bionic Chip', NULL, '12MP Ultra Wide', 20, 'Face ID', '5G'),
+
+-- iPad Air (5th Gen)
+('10.9-inch Liquid Retina, 2360x1640', FALSE, 'Aluminum', 'No Home Button', '12MP', 'M1 Chip', NULL, '12MP Ultra Wide', 10, 'Touch ID', '5G'),
+
+-- MacBook Pro 14-inch (M3 Pro)
+('14.2-inch Liquid Retina XDR, 3024x1964', TRUE, 'Aluminum', 'Touch ID Button', '1080p', 'M3 Pro Chip', '14-core GPU', NULL, 18, 'Touch ID', 'Wi-Fi 6E'),
+
+-- MacBook Pro 16-inch (M3 Max)
+('16.2-inch Liquid Retina XDR, 3456x2234', TRUE, 'Aluminum', 'Touch ID Button', '1080p', 'M3 Max Chip', '40-core GPU', NULL, 22, 'Touch ID', 'Wi-Fi 6E');
+
+
+INSERT INTO Device (device_type, model, color, specs, price, capacity, weight, keyboard_layout)
+VALUES
+-- iPhone SE (2022)
+((SELECT ID FROM Device_Type WHERE device_type = 'iPhone'), 'iPhone SE (2022)', 'Midnight', 
+ (SELECT ID FROM Device_Specs WHERE CPU = 'A15 Bionic Chip' AND button_specs = 'Home Button'), 429.99, '128GB', 0.144, 'QWERTY'),
+
+-- iPhone 15
+((SELECT ID FROM Device_Type WHERE device_type = 'iPhone'), 'iPhone 15', 'Blue', 
+ (SELECT ID FROM Device_Specs WHERE CPU = 'A16 Bionic Chip' AND display_specs LIKE '6.1%'), 799.99, '256GB', 0.171, 'QWERTY'),
+
+-- iPhone 15 Plus
+((SELECT ID FROM Device_Type WHERE device_type = 'iPhone'), 'iPhone 15 Plus', 'Pink', 
+ (SELECT ID FROM Device_Specs WHERE CPU = 'A16 Bionic Chip' AND display_specs LIKE '6.7%'), 899.99, '512GB', 0.201, 'QWERTY'),
+
+-- iPhone 14
+((SELECT ID FROM Device_Type WHERE device_type = 'iPhone'), 'iPhone 14', 'Purple', 
+ (SELECT ID FROM Device_Specs WHERE CPU = 'A15 Bionic Chip' AND display_specs LIKE '6.1%'), 699.99, '128GB', 0.172, 'QWERTY'),
+
+-- iPad Air (5th Gen)
+((SELECT ID FROM Device_Type WHERE device_type = 'iPad'), 'iPad Air (5th Gen)', 'Space Gray', 
+ (SELECT ID FROM Device_Specs WHERE CPU = 'M1 Chip'), 599.99, '256GB', 0.461, 'QWERTY'),
+
+-- MacBook Pro 14-inch (M3 Pro)
+((SELECT ID FROM Device_Type WHERE device_type = 'MacBook'), 'MacBook Pro 14-inch (M3 Pro)', 'Silver', 
+ (SELECT ID FROM Device_Specs WHERE CPU = 'M3 Pro Chip'), 1999.99, '1TB', 1.55, 'QWERTY'),
+
+-- MacBook Pro 16-inch (M3 Max)
+((SELECT ID FROM Device_Type WHERE device_type = 'MacBook'), 'MacBook Pro 16-inch (M3 Max)', 'Space Black', 
+ (SELECT ID FROM Device_Specs WHERE CPU = 'M3 Max Chip'), 3499.99, '2TB', 2.16, 'QWERTY');
+
+
+CREATE TABLE Device_Promo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    imageUrl VARCHAR(255) NOT NULL,
+    link VARCHAR(255) NOT NULL
+);
+insert into `device_promo` (`name`, `imageURL`,`link`) values ('Macbook','macbook-image.jpg','/macbook');
+insert into `device_promo` (`name`, `imageURL`,`link`) values ('iPad','ipad-image.jpg','/ipad');
+insert into `device_promo` (`name`, `imageURL`,`link`) values ('iPhone','iphone-image.jpg','/iphone');
