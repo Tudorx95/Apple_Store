@@ -8,17 +8,36 @@
 /* For carousel images*/
 .carousel-item {
   min-width: 200px;
-  max-width: 250px;
+  max-width: 500px;
   display: flex;
   justify-content: center;
   align-items: center;
   background: #f4f4f4;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
 }
 
 .carousel-item img {
+  display: block;
   width: 100%;
   height: auto;
+  border-radius: 5px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.carousel-item:hover img {
+  transform: scale(1.1); /* Zoom effect on hover */
+  opacity: 0.9; /* Slight transparency on hover */
+}
+
+.product-text {
+  position: absolute;
+  font-size: 3vw;
+  font-family: "Times New Roman", Times, serif;
+  color: white;
+  top: 2%;
   border-radius: 5px;
 }

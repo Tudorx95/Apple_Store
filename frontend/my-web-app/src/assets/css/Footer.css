@@ -1,0 +1,15 @@
+/* Footer Section */
+.footer {
+  background-color: #d3d3d3; /* Light gray */
+  color: white;
+  display: flex;
+  padding: 20px 0;
+  width: 100%;
+  justify-content: center;
+  overflow: hidden;
+}
+.footer h2 {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+}

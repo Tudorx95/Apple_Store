@@ -74,6 +74,119 @@ app.get('/device-promo',(req,res)=>{
     });
 });
 
+app.post('/api/subscribe', (req, res) => {
+    const { firstname, lastname, email } = req.body;
+    const loggedAt=new Date();
+
+    if (!firstname || !lastname || !email) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    db.query('SELECT * FROM Newsletter_user WHERE email = ?', [email], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error. Please try again later.' });
+        }
+        if (results.length > 0) {
+            return res.status(409).json({ message: 'This email is already subscribed.' });
+        }
+
+        db.query('INSERT INTO Newsletter_user (firstname, lastname, email, subscribed_at) VALUES (?, ?, ?, ?)',
+            [firstname, lastname, email,loggedAt],
+            (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Failed to subscribe. Try again later.' });
+                }
+                res.status(201).json({ message: 'Successfully subscribed!', subscribed_at: loggedAt });
+            }
+        );
+    });
+});
+
+app.get("/contact", (req,res)=>{
+    db.query('SELECT * FROM apple_stores', (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+        const formattedResults = results.map(store => ({
+            ...store,
+            latitude: parseFloat(store.latitude),
+            longitude: parseFloat(store.longitude),
+            position: { 
+              lat: parseFloat(store.latitude), 
+              lng: parseFloat(store.longitude) 
+            }
+          }));
+      
+        res.status(200).json(formattedResults);
+        
+    });
+});
+
+app.get("/products/macbook", (req, res) => {
+    const query = `
+        SELECT device.*, device_specs.*
+        FROM device
+        INNER JOIN device_specs ON device.specs = device_specs.ID
+        INNER JOIN device_type ON device_type.ID = device.device_type
+        WHERE device_type.device_type = 'MacBook';
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Database error", error: err });
+        }
+        res.json(results);
+    });
+});
+
+app.get("/products/ipad", (req, res) => {
+    const query = `
+        SELECT device.*, device_specs.*
+        FROM device
+        INNER JOIN device_specs ON device.specs = device_specs.ID
+        INNER JOIN device_type ON device_type.ID = device.device_type
+        WHERE device_type.device_type = 'iPad';
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Database error", error: err });
+        }
+        res.json(results);
+    });
+});
+
+app.get("/products/iphone", (req, res) => {
+    const query = `
+        SELECT device.*, device_specs.*
+        FROM device
+        INNER JOIN device_specs ON device.specs = device_specs.ID
+        INNER JOIN device_type ON device_type.ID = device.device_type
+        WHERE device_type.device_type = 'iPhone';
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Database error", error: err });
+        }
+        res.json(results);
+    });
+});
+
+app.get('/products/models', async (req, res) => {
+      const query = `SELECT device.model, device_type.device_type, device.ID FROM device
+                     INNER JOIN device_type ON 
+                     device.device_type = device_type.ID`;
+      
+      db.query(query,(err,results)=>{
+        if(err){
+            return res.status(500).json({ message: "Database error", error: err });
+        }
+        res.json(results);
+      });   
+  });
+
+
 app.get("/", (req, res) => {
     res.send("Response from server");
 });

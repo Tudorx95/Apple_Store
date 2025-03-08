@@ -39,6 +39,10 @@ CREATE TABLE Device (
     FOREIGN KEY (specs) REFERENCES Device_Specs(ID) ON DELETE SET NULL
 );
 
+ALTER TABLE Device
+ADD COLUMN image_url VARCHAR(255),
+ADD COLUMN production_date DATE,
+ADD COLUMN in_stock BOOLEAN DEFAULT TRUE;
 
 INSERT INTO Device_Type (device_type) VALUES
 ('iPhone'),
@@ -136,3 +140,26 @@ CREATE TABLE Device_Promo (
 insert into `device_promo` (`name`, `imageURL`,`link`) values ('Macbook','macbook-image.jpg','/macbook');
 insert into `device_promo` (`name`, `imageURL`,`link`) values ('iPad','ipad-image.jpg','/ipad');
 insert into `device_promo` (`name`, `imageURL`,`link`) values ('iPhone','iphone-image.jpg','/iphone');
+
+CREATE TABLE Newsletter_user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    firstname VARCHAR(50) NOT NULL,
+    lastname VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE apple_stores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    latitude DECIMAL(9,6) NOT NULL,
+    longitude DECIMAL(9,6) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    hours VARCHAR(100) NOT NULL
+);
+
+INSERT INTO apple_stores (name, latitude, longitude, address, phone, hours) VALUES
+('Apple Store - Downtown', 40.7128, -74.0060, '123 Main Street, New York, NY 10001', '+1 (212) 555-1234', 'Mon-Sat: 10AM-9PM, Sun: 11AM-7PM'),
+('Apple Store - Westside', 34.0522, -118.2437, '456 Sunset Blvd, Los Angeles, CA 90028', '+1 (310) 555-5678', 'Mon-Sat: 9AM-10PM, Sun: 10AM-8PM'),
+('Apple Store - North Center', 41.8781, -87.6298, '789 Michigan Ave, Chicago, IL 60611', '+1 (312) 555-9012', 'Mon-Sat: 10AM-9PM, Sun: 11AM-6PM');

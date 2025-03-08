@@ -7,6 +7,9 @@ const Product = ({ name, imageUrl, link }) => {
       <Link to={link}>
         <img src={`/images/${imageUrl}`} alt={name} />
       </Link>
+      <div className='product-text'>
+        <span>Explore</span>
+      </div>
     </div>
   );
 };

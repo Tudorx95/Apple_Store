@@ -4,7 +4,7 @@ import '../assets/css/HomePage.css';
 import Carousel from '../components/layout/Carousel'; // Assuming you will create a separate carousel component
 import MainVideo from '../assets/appleStore_HomePage.mp4';
 import WelcomeMessage from '../components/layout/WelcomeMessage';
-
+import History from '../models/History';
 
 const HomePage = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const HomePage = () => {
     e.preventDefault();
     
     // Send data to the backend to store in the MySQL database
-    const response = await fetch('/api/subscribe', {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/subscribe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,18 +33,18 @@ const HomePage = () => {
     if (response.ok) {
       alert('You have successfully subscribed!');
     } else {
-      alert('There was an error subscribing.');
+      alert('User already subscribed!');
     }
   };
 
   return (
     <div className="home-page">
       {/* Cascading Welcome Message */}
-       {/* Add WelcomeMessage component here */}
-       <WelcomeMessage />
 
       {/* Video Section */}
       <div className="video-section">
+       {/* Add WelcomeMessage component here */}
+        <WelcomeMessage />
         <video autoPlay loop muted>
           <source src={MainVideo} type="video/mp4" />
           Your browser does not support the video tag.
@@ -52,7 +52,7 @@ const HomePage = () => {
       </div>
 
       {/* Carousel Section */}
-      <div className="carousel-section">
+      <div className="carousel-section no-padding">
         <Carousel />
       </div>
 
@@ -89,12 +89,14 @@ const HomePage = () => {
       </div>
 
       {/* Footer Section */}
-      <footer className="footer">
-        <div className="footer-images">
-          <img src="wozniak-photo.jpg" alt="Steve Wozniak" />
-          <img src="jobs-photo.jpg" alt="Steve Jobs" />
-        </div>
-      </footer>
+      <div className='bottom-part'>
+        <h2>Apple Founders' History</h2>
+          <div className='history-videos'>
+            <History videoId="CeSAjK2CBEA" width='900'/>
+            <History videoId="pJif4i9NRdI" width='900'/>
+          </div>
+      </div>
+      
     </div>
   );
 };
