@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import {   useProduct } from '../models/ProductContext';
 import '../assets/css/ProductsPage.css';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+
+  const { setSelectedProduct, clearSelectedProduct } = useProduct();
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
@@ -18,6 +23,7 @@ const ProductsPage = () => {
     promotion: false,
     model: []
   });
+  
 
   // Access current location
   const location = useLocation();
@@ -166,6 +172,10 @@ const ProductsPage = () => {
     });
   };
   
+  const handleProductClick = (product) => {
+    clearSelectedProduct();
+    setSelectedProduct(product);
+  };
 
   if (loading) return <div className="loading">Loading products...</div>;
   if (error) return <div className="error">{error}</div>;
@@ -334,7 +344,17 @@ const ProductsPage = () => {
                     {product.specs.CPU} • {product.specs.GPU} • {product.capacity}
                   </p>
                   <p className="product-price">${Number(product.price).toFixed(2)}</p>
-                  <button className="details-button">Details</button>
+                  <Link 
+                    key={product.ID}
+                    to={{
+                      pathname: `/product/${product.device_type}/${product.ID}`,
+                      state: { product }
+                    }} 
+                    className="details-button"
+                    onClick={() => handleProductClick(product)}
+                  >
+                    Details
+                  </Link>
                 </div>
               </div>
             ))

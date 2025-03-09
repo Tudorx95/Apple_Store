@@ -173,6 +173,7 @@ app.get("/products/iphone", (req, res) => {
     });
 });
 
+
 app.get('/products/models', async (req, res) => {
       const query = `SELECT device.model, device_type.device_type, device.ID FROM device
                      INNER JOIN device_type ON 
@@ -186,14 +187,48 @@ app.get('/products/models', async (req, res) => {
       });   
   });
 
+  app.get('/products/images/:device_type/:ID', async (req, res) => {
+    const deviceType = req.params.device_type;
+    const productId = req.params.ID;
+  
+    const query = `
+      SELECT image_url FROM device_images
+      WHERE device_ID = ?
+    `;
+  
+    db.query(query, [productId], (err, results) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ message: "Database error", error: err });
+      }
+  
+      // If images are found, return them as an array of image URLs
+      const imageUrls = results.map(result => `/images/${result.image_url}`);
+      res.json(imageUrls);
+    });
+  });
+  
+  
+  
 
 app.get("/", (req, res) => {
     res.send("Response from server");
 });
 
+const crypto= require('crypto');
+// Generate a secure random encryption key (32 bytes = 256-bit AES key)
+let key;    // 
+app.get('/encryption-key',(req,res)=>{
+    const encryptionKey = crypto.randomBytes(32).toString('hex');
+    key= encryptionKey;
+    res.json({key:encryptionKey });
+})
+
+app.get('/decryption-key',(req,res)=>{
+    res.json({key:key });
+})
 
 // Error handling for securing sensitive information about the DB
-
 app.use((req, res, next) => {
     res.status(404).json({ message: 'Not Found' }); // routes that are not found
 });

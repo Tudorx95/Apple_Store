@@ -1,0 +1,367 @@
+/* ProductDetails.css */
+
+.product-details-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+
+  padding-bottom: 80px; /* Make room for sticky navbar */
+}
+
+.product-details-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem;
+}
+
+/* Left side - Main product image */
+.product-main-image {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.product-main-image img {
+  max-width: 500px;
+  width: 100%;
+  max-height: 500px;
+  border-radius: 20px;
+  object-fit: contain;
+}
+
+/* Right side - Product information */
+.product-details-info {
+  width: 50%;
+  margin-left: 50px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.product-title {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.product-color {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.product-specs {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.product-price-main {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #d72638;
+  margin: 1.5rem 0;
+}
+
+.product-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.add-to-cart-button {
+  background-color: #2e86de;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.add-to-cart-button:hover {
+  background-color: #1c6bc8;
+}
+
+/* Additional Images Section */
+.additional-images-section {
+  margin: 3rem 2rem;
+  text-align: center;
+}
+
+.additional-images-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.current-additional-image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.current-additional-image img {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 20px;
+}
+.current-additional-image img:hover {
+  transform: scale(1.1);
+}
+
+.view-more-images {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  transition: background-color 0.3s;
+}
+
+.view-more-images:hover {
+  background-color: #e8e8e8;
+}
+
+.additional-images-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 1rem 0;
+  position: relative;
+}
+
+.gallery-image {
+  flex: 0 0 150px;
+  height: 150px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  margin: 10px;
+}
+
+.gallery-image.active {
+  border-color: #2e86de;
+}
+
+.gallery-image img {
+  width: 150px;
+  height: 150px;
+  cursor: pointer;
+  object-fit: cover;
+  border-radius: 12px;
+  max-width: 100%;
+  transition: transform 0.2s ease;
+}
+.gallery-image img:hover {
+  transform: scale(1.1);
+}
+
+/* Add these styles to your ProductDetails.css file */
+
+/* New All Product Images Section */
+.all-product-images-section {
+  margin: 3rem 2rem;
+}
+
+.all-product-images-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.loading-images {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.product-image-item {
+  border: 3px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-image-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-image-item.active {
+  border-color: #2e86de;
+}
+
+.product-image-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .product-image-item img {
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .product-image-item img {
+    height: 120px;
+  }
+}
+
+.next-image-button {
+  width: 40px;
+  height: 40px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  right: 0;
+  margin-left: 1rem;
+}
+
+.next-image-button:hover {
+  background-color: #f5f5f5;
+}
+
+/* Enlarge photo*/
+.enlarged-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.enlarged-image-container img {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+}
+.image-enlarged-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+}
+
+.image-enlarged-overlay:hover {
+  cursor: pointer;
+}
+
+/* Sticky Bottom Navbar */
+.sticky-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 2rem;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 999;
+}
+
+.sticky-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #d72638;
+}
+
+.sticky-add-to-cart {
+  background-color: #2e86de;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 30px;
+  transition: background-color 0.3s;
+}
+
+.sticky-add-to-cart:hover {
+  background-color: #1c6bc8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-details-content {
+    flex-direction: column;
+  }
+
+  .product-details-info {
+    width: 100%;
+    font-family: Georgia, "Times New Roman", Times, serif;
+  }
+
+  .product-title {
+    font-size: 2rem;
+  }
+
+  .sticky-bottom-nav {
+    padding: 0.8rem 1rem;
+  }
+
+  .sticky-price {
+    font-size: 1.3rem;
+  }
+
+  .sticky-add-to-cart {
+    font-size: 1rem;
+    padding: 0.7rem 1.2rem;
+  }
+}

@@ -9,6 +9,8 @@ import Loading from './components/layout/Loading';
 import './assets/css/App.css';
 import { LoadScript } from '@react-google-maps/api';
 import ProductsPage from './pages/ProductsPage';
+import ProductDetails from './pages/ProductDetails';
+import { ProductProvider } from './models/ProductContext';
 
 
 function App() {
@@ -22,15 +24,17 @@ function App() {
   }, []);
 
   return (
+
     <Router>
       <div className="app-container">
       {loading ? (
           <Loading /> // Show Loading component while loading
         ) : (
           <>
+          <Navbar />
           <LoadScript googleMapsApiKey="AIzaSyDF2NfsIYJbLAaBBvXj7dGD9vMOR1y53W0">
-            <Navbar />
             <main className="main-content">
+              <ProductProvider>
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -40,7 +44,9 @@ function App() {
                 <Route path="/ipad" element={<ProductsPage />} />
                 <Route path="/iphone" element={<ProductsPage />} />
                 <Route path="/service" element={<div>Service Page (Coming Soon)</div>} />
+                <Route path="/product/:deviceType/:productId" element={<ProductDetails />} />
               </Routes>
+              </ProductProvider>
             </main>
             <Footer />
             </LoadScript>
@@ -48,6 +54,7 @@ function App() {
         )}
       </div>
     </Router>
+    
   );
 }
 

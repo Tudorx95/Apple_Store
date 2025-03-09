@@ -163,3 +163,90 @@ INSERT INTO apple_stores (name, latitude, longitude, address, phone, hours) VALU
 ('Apple Store - Downtown', 40.7128, -74.0060, '123 Main Street, New York, NY 10001', '+1 (212) 555-1234', 'Mon-Sat: 10AM-9PM, Sun: 11AM-7PM'),
 ('Apple Store - Westside', 34.0522, -118.2437, '456 Sunset Blvd, Los Angeles, CA 90028', '+1 (310) 555-5678', 'Mon-Sat: 9AM-10PM, Sun: 10AM-8PM'),
 ('Apple Store - North Center', 41.8781, -87.6298, '789 Michigan Ave, Chicago, IL 60611', '+1 (312) 555-9012', 'Mon-Sat: 10AM-9PM, Sun: 11AM-6PM');
+
+CREATE TABLE device_images (
+  ID INT AUTO_INCREMENT PRIMARY KEY,
+  device_ID INT NOT NULL,
+  image_url VARCHAR(255) NOT NULL,
+  FOREIGN KEY (device_ID) REFERENCES device(ID) ON DELETE CASCADE
+);
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (1, 'iphone_15_pro_max_natural_titanium_pdp_image2.jpg'),
+(1,'hero_medium_2x.png'),
+(1, 'chip_medium_2x.png'),
+(1,'design_medium_2x.png'),
+(1,'portrait_medium_2x.png'),
+(1,'connectivity_medium_2x.png'),
+(1,'action_button_medium_2x.png');
+
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (2, 'ipadpro12_9.avif'),
+(2,'ipad-pro-banner.jpeg'),
+(2,'apple-ipad-pro-2017.jpg'),
+(2,'ipadproM2Chip.jpeg');
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (3, 'macbook_air_15_in_m3_starlight_pdp_image_position_2__wwen_2.jpg'),
+(3,'macbook_air_15_in_m3_starlight_pdp_image_position_3__wwen_2.jpg'),
+(3,'macbook_air_15_in_m3_starlight_pdp_image_position_4__wwen_2.jpg'),
+(3,'macbook_air_15_in_m3_starlight_pdp_image_position_5__wwen_2.jpg'),
+(3,'macbook_air_15_in_m3_starlight_pdp_image_position_6__wwen_2.jpg'),
+(3,'macbook_air_15_in_m3_starlight_pdp_image_position_7__wwen_2.jpg'),
+(3,'macbook_air_15_in_m3_starlight_pdp_image_position_8__wwen_2.jpg'),
+(3,'macbook_air_15_in_m3_starlight_pdp_image_position_9__wwen_2.jpg');
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (4, 'iphone_se3_starlight_pdp_image_position-1b__wwen_10_2.jpg'),
+(4,'iphone_se3_starlight_pdp_image_position-2__wwen_10_2.jpg'),
+(4,'iphone_se3_starlight_pdp_image_position-3__wwen_10_2.jpg'),
+(4,'iphone_se3_starlight_pdp_image_position-4__wwen_10_2.jpg'),
+(4,'iphone_se3_starlight_pdp_image_position-6_5g__wwen_7_2.jpg'),
+(4,'iphone_se3_starlight_pdp_image_position-5__wwen_7_2.jpg');
+
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (5, 'iphone_15_blue_pdp_image_position.jpg'),
+(5,'iphone_15_blue_pdp_image_position2.jpg'),
+(5,'iphone_15_blue_pdp_image_position5.jpg'),
+(5,'iphone_15_blue_pdp_image_position-9__en-us_2_1.jpg');
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (6, 'iphone_15_blue_pdp_image_position.jpg'),
+(6,'iphone_15_blue_pdp_image_position2.jpg'),
+(6,'iphone_15_blue_pdp_image_position5.jpg'),
+(6,'iphone_15_blue_pdp_image_position-9__en-us_2_1.jpg');
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (7, 'czcs_iphone14_q422_blue_pdp_image_position1b.jpg'),
+(7,'czcs_iphone14_q422_blue_pdp_image_position-1a_t_1_1_8.jpg'),
+(7,'czcs_iphone14_q422_blue_pdp_image_position-2_t_1_1_8.jpg'),
+(7,'czcs_iphone14_q422_blue_pdp_image_position-3_t_1_1_8.jpg'),
+(7,'wwen_iphone14_q223_yellow_pdp_image_position-4-min_17.jpg'),
+(7,'wwen_iphone14_q223_yellow_pdp_image_position-5-min_13.jpg');
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (8, 'Apple-iPad-Air-hero-color.jpg'),
+(8,'Apple-iPad-Air-usbc.jpg'),
+(8,'Apple-iPad-Air-Magic-Keyboard.jpg'),
+(8,'Apple-iPad-Air-iPadOS-Quick-Note.jpg'),
+(8,'Apple-iPad-Air-iPadOS-Split-View.jpg');
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (9, 'macbook_pro_m3_space_gray_pdp_image_position-2__en-us_2_1_2_1.jpg'),
+(9,'macbook_pro_m3_space_gray_pdp_image_position-3__en-us_2_1_2_1.jpg'),
+(9,'macbook_pro_m3_space_gray_pdp_image_position-4__en-us_2_2_1.jpg'),
+(9,'macbook_pro_m3_space_gray_pdp_image_position-5__en-us_2_2_1.jpg'),
+(9,'macbook_pro_m3_space_gray_pdp_image_position-6__en-us_2_2_1.jpg'),
+(9,'macbook_pro_m3_space_gray_pdp_image_position-7__en-us_2_2_1.jpg'),
+(9,'macbook_pro_m3_space_gray_pdp_image_position-9__en-us_2_1_2_1.jpg');
+
+INSERT INTO device_images (device_ID, image_url)
+VALUES (10, 'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_2__ce-ww_t_3_1.jpg'),
+(10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_3__ce-ww_t_3_1.jpg'),
+(10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_4__ce-ww_t_3_1.jpg'),
+(10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_5__ce-ww_t_3_1.jpg'),
+(10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_6__ce-ww_t_3_1.jpg'),
+(10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_7__ce-ww_t_3_1.jpg'),
+(10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_8__ce-ww_t_3_1.jpg');
