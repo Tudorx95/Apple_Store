@@ -12,6 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@react-email/components": "^0.0.33",
+    "@sendgrid/mail": "^8.1.4",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "concurrently": "^9.1.2",
@@ -23,6 +25,7 @@
     "mongoose": "^8.10.2",
     "morgan": "^1.10.0",
     "mysql2": "^3.12.0",
+    "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "readline-sync": "^1.4.10"
   }

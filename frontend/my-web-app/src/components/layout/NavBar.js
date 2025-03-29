@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import '../../assets/css/NavBar.css';
@@ -9,11 +9,15 @@ import logo from '../../assets/logo_dynamic.gif'; // Add your logo image path he
 import searchIcon from '../../assets/searchLoop.png'; // Add search icon path here
 import personIcon from '../../assets/personIcon.jpg'; // Add person icon path here
 import cartIcon from '../../assets/cartIcon.png'; // Add cart icon path here
+import {useAuth} from '../../models/AuthProvider';
 
 const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(''); // State for search term
+  const [authPopupOpen, setAuthPopupOpen] = useState(false);
+  //const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+  const { token, isTokenExpired, logout } = useAuth();
   
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -22,6 +26,42 @@ const NavBar = () => {
   const scrollToTop = () => {
     window.scrollTo(0, 0); // Scroll to the top of the page
   };
+
+  const handleAuthClick = () => {
+    setAuthPopupOpen(true);
+  };
+
+  const closeAuthPopup = () => {
+    setAuthPopupOpen(false);
+  };
+  
+  const handleAuthenticate = () => {
+    if (token && !isTokenExpired(token)) {
+      navigate("dashboard"); // Navigate to dashboard if the token is valid
+  } else {
+      //setIsAuthenticated(true);
+      navigate("login"); // Otherwise, navigate to login
+    }
+    setAuthPopupOpen(false);
+  };
+
+  
+  const handleLogout = () => {
+    logout(); // Call logout function to clear token
+    navigate('/'); // Redirect to homepage after logout
+    setAuthPopupOpen(false);
+  };
+
+   // Handle ESC key press to close the pop-up
+   useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setAuthPopupOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -68,7 +108,7 @@ const NavBar = () => {
         {/* Action Buttons */}
         <div className="navbar-actions">
           <SearchBar onSearch={handleSearch} />
-          <button className="user-btn">
+          <button className="user-btn" onClick={handleAuthClick}>
             <img src={personIcon} alt="User" className="navbar-user-avatar" />
           </button>
           <button className="cart-btn">
@@ -81,6 +121,30 @@ const NavBar = () => {
           <i className={menuOpen ? 'fas fa-times' : 'fas fa-bars'} />
         </div>
       </div>
+
+        {/* Authentication Pop-up */}
+        {authPopupOpen && (
+        <div className="auth-popup-overlay" onClick={closeAuthPopup}>
+          <div className="auth-popup" onClick={(e) => e.stopPropagation()}>
+            {token && !isTokenExpired(token) ? (
+              <>
+                <button className="account-btn" onClick={handleAuthenticate}>
+                  My Account
+                </button>
+                <button className="account-btn logout-btn" onClick={handleLogout}>
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="auth-btn" onClick={handleAuthenticate}>
+                  Authenticate / Register
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

@@ -11,7 +11,10 @@ import { LoadScript } from '@react-google-maps/api';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetails from './pages/ProductDetails';
 import { ProductProvider } from './models/ProductContext';
-
+import RegisterPage from './pages/RegisterPage';
+import LoginPage from './pages/LoginPage';
+import Dashboard from './pages/Dashboard';
+import { AuthProvider } from './models/AuthProvider';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -31,12 +34,16 @@ function App() {
           <Loading /> // Show Loading component while loading
         ) : (
           <>
+          <AuthProvider>
           <Navbar />
           <LoadScript googleMapsApiKey="AIzaSyDF2NfsIYJbLAaBBvXj7dGD9vMOR1y53W0">
             <main className="main-content">
-              <ProductProvider>
+            <ProductProvider>
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} /> {/* Add the new route */}
                 {/* Add other routes for MacBook, iPad, iPhone, and Service pages */}
@@ -50,6 +57,7 @@ function App() {
             </main>
             <Footer />
             </LoadScript>
+          </AuthProvider>
           </>
         )}
       </div>

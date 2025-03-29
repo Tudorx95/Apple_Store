@@ -12,11 +12,26 @@ const ProductDetails = () => {
   const [showMoreImages, setShowMoreImages] = useState(false);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
   const [enlargedImage, setEnlargedImage] = useState(null);
+  const [configurations, setConfigurations] = useState({
+    colors: [],
+    capacities: [],
+    cpus: [],
+    gpus: [],
+    unifiedmemories: []
+  });
+  const [selectedConfig, setSelectedConfig] = useState({
+    color: '',
+    capacity: '',
+    cpu: '',
+    gpu: '',
+    unified_memories: ''
+  });
 
   useEffect(() => {
     if (selectedProduct) {
       setIsProductLoaded(true);
       fetchAdditionalImages(selectedProduct.ID, selectedProduct.device_type);
+      fetchConfigurations(selectedProduct.ID, selectedProduct.device_type);
     }
   }, [selectedProduct]);
 
@@ -34,15 +49,38 @@ const ProductDetails = () => {
     }
   };
 
-  const handleNextImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === additionalImages.length - 1 ? 0 : prevIndex + 1
-    );
+  const fetchConfigurations = async (modelID, device_type) => {
+    try {
+      const response = await fetch(`/products/${device_type}/${modelID}`);
+      if (response.ok) {
+        const data = await response.json();
+        setConfigurations(data);
+        setSelectedConfig({
+          color: data.colors[0] || '',
+          capacity: data.capacities[0] || '',
+          cpu: data.cpus[0] || '',
+          gpu: data.gpus[0] || '',
+          unified_memories: data.unifiedmemories[0] || ''
+        });
+      } else {
+        console.error('Failed to fetch configurations:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching configurations:', error);
+    }
+  };
+
+  const handleConfigChange = (e) => {
+    setSelectedConfig({ ...selectedConfig, [e.target.name]: e.target.value });
   };
 
   const handleAddToCart = () => {
-    alert(`${selectedProduct.model} added to cart!`);
+    alert(`${selectedProduct.model} (${selectedConfig.color}, ${selectedConfig.capacity}, ${selectedConfig.cpu}, ${selectedConfig.gpu}, ${selectedConfig.unified_memories}) added to cart!`);
   };
+
+  if (!isProductLoaded) {
+    return <div className="error">Product not found. Please navigate from the product list.</div>;
+  }
 
   const openEnlargedImage = (img) => {
     setEnlargedImage(img);
@@ -54,33 +92,63 @@ const ProductDetails = () => {
     setEnlargedImage(null);
   };
 
-  if (!isProductLoaded) {
-    return <div className="error">Product not found. Please navigate from the product list.</div>;
-  }
 
   return (
     <div className="product-details-container">
       <div className="product-details-content">
         <div className="product-main-image">
-          <img
-            src={`/images/${selectedProduct.image_url}`}
-            alt={selectedProduct.model}
-          />
+          <img src={`/images/${selectedProduct.image_url}`} alt={selectedProduct.model} />
         </div>
 
         <div className="product-details-info">
           <h1 className="product-title">{selectedProduct.model}</h1>
-          <p className="product-color">Color: {selectedProduct.color}</p>
-          <p className="product-capacity">Capacity: {selectedProduct.capacity}</p>
-          <p className="product-cpu">CPU: {selectedProduct.CPU}</p>
-          {selectedProduct.GPU && (
-            <p className="product-gpu">GPU: {selectedProduct.GPU}</p>
+          
+          <label>Color:</label>
+          <select className='custom-select' name="color" value={selectedConfig.color} onChange={handleConfigChange}>
+            {configurations.colors.map((color, index) => (
+              <option key={index} value={color}>{color}</option>
+            ))}
+          </select>
+          
+          <label>Memory/Storage:</label>
+          <select className='custom-select' name="capacity" value={selectedConfig.capacity} onChange={handleConfigChange}>
+            {configurations.capacities.map((capacity, index) => (
+              <option key={index} value={capacity}>{capacity}</option>
+            ))}
+          </select>
+          
+          <label>CPU:</label>
+          <select className='custom-select' name="cpu" value={selectedConfig.cpu} onChange={handleConfigChange}>
+            {configurations.cpus.map((cpu, index) => (
+              <option key={index} value={cpu}>{cpu}</option>
+            ))}
+          </select>
+          
+          {configurations.gpus.length > 0 && (
+            <>
+              <label>GPU:</label>
+              <select className='custom-select' name="gpu" value={selectedConfig.gpu} onChange={handleConfigChange}>
+                {configurations.gpus.map((gpu, index) => (
+                  <option key={index} value={gpu}>{gpu}</option>
+                ))}
+              </select>
+            </>
           )}
+
+          {configurations.unifiedmemories && configurations.unifiedmemories.length > 0 && (
+            <>
+              <label>Unified Memory:</label>
+              <select className='custom-select' name="unified_memories" value={selectedConfig.unified_memories} onChange={handleConfigChange}>
+                {configurations.unifiedmemories.map((unified_memories, index) => (
+                  <option key={index} value={unified_memories}>{unified_memories}</option>
+                ))}
+              </select>
+            </>
+          )}
+          
           <p className="product-price-main">${Number(selectedProduct.price).toFixed(2)}</p>
           <p className="product-description">{selectedProduct.description}</p>
-          <button className="add-to-cart-button" onClick={handleAddToCart}>
-            Add to Cart
-          </button>
+          <button className="add-to-cart-button" onClick={handleAddToCart}>Add to Cart</button>
         </div>
       </div>
 
@@ -126,9 +194,7 @@ const ProductDetails = () => {
 
       <div className="sticky-bottom-nav">
         <div className="sticky-price">${Number(selectedProduct.price).toFixed(2)}</div>
-        <button className="sticky-add-to-cart" onClick={handleAddToCart}>
-          Add to Cart
-        </button>
+        <button className="sticky-add-to-cart" onClick={handleAddToCart}>Add to Cart</button>
       </div>
     </div>
   );

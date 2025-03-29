@@ -28,21 +28,17 @@ CREATE TABLE Device (
     ID INT PRIMARY KEY AUTO_INCREMENT,
     device_type INT NOT NULL,
     model VARCHAR(100) NOT NULL,
-    color VARCHAR(50),
     specs INT,  -- References Device_Specs
     price DECIMAL(10,2) NOT NULL,
-    capacity VARCHAR(50),
     weight DECIMAL(5,2),  -- Weight in kg
     keyboard_layout VARCHAR(50),
+    image_url VARCHAR(255),
+    production_date DATE,
+    in_stock BOOLEAN DEFAULT TRUE,
 
     FOREIGN KEY (device_type) REFERENCES Device_Type(ID) ON DELETE CASCADE,
     FOREIGN KEY (specs) REFERENCES Device_Specs(ID) ON DELETE SET NULL
 );
-
-ALTER TABLE Device
-ADD COLUMN image_url VARCHAR(255),
-ADD COLUMN production_date DATE,
-ADD COLUMN in_stock BOOLEAN DEFAULT TRUE;
 
 INSERT INTO Device_Type (device_type) VALUES
 ('iPhone'),
@@ -250,3 +246,170 @@ VALUES (10, 'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_positi
 (10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_6__ce-ww_t_3_1.jpg'),
 (10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_7__ce-ww_t_3_1.jpg'),
 (10,'macbook_pro_16-inch_m4_pro_or_max_chip_space_black_pdp_image_position_8__ce-ww_t_3_1.jpg');
+
+
+CREATE TABLE Device_Color (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    device_id INT NOT NULL,
+    color VARCHAR(50) NOT NULL,
+    
+    FOREIGN KEY (device_id) REFERENCES Device(ID) ON DELETE CASCADE
+);
+INSERT INTO Device_Color (device_id, color)
+VALUES
+((SELECT ID FROM Device WHERE model = 'iPhone 15 Pro Max'), 'Natural Titanium'),
+((SELECT ID FROM Device WHERE model = 'iPad Pro 12.9'), 'Silver'),
+((SELECT ID FROM Device WHERE model = 'MacBook Air M2 15-inch'), 'Midnight'),
+((SELECT ID FROM Device WHERE model = 'iPhone SE (2022)'), 'Midnight'),
+((SELECT ID FROM Device WHERE model = 'iPhone 15'), 'Blue'),
+((SELECT ID FROM Device WHERE model = 'iPhone 15 Plus'), 'Pink'),
+((SELECT ID FROM Device WHERE model = 'iPhone 14'), 'Purple'),
+((SELECT ID FROM Device WHERE model = 'iPad Air (5th Gen)'), 'Space Gray'),
+((SELECT ID FROM Device WHERE model = 'MacBook Pro 14-inch (M3 Pro)'), 'Silver'),
+((SELECT ID FROM Device WHERE model = 'MacBook Pro 16-inch (M3 Max)'), 'Space Black');
+
+
+
+CREATE TABLE Device_Capacity (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    device_id INT NOT NULL,
+    capacity VARCHAR(10) NOT NULL,  -- Store as a string (e.g., '256GB', '1TB')
+
+    FOREIGN KEY (device_id) REFERENCES Device(ID) ON DELETE CASCADE
+);
+INSERT INTO Device_Capacity (device_id, capacity)
+VALUES
+((SELECT ID FROM Device WHERE model = 'iPhone 15 Pro Max'), '256GB'),
+((SELECT ID FROM Device WHERE model = 'iPad Pro 12.9'), '512GB'),
+((SELECT ID FROM Device WHERE model = 'MacBook Air M2 15-inch'), '1TB'),
+((SELECT ID FROM Device WHERE model = 'iPhone SE (2022)'), '128GB'),
+((SELECT ID FROM Device WHERE model = 'iPhone 15'), '256GB'),
+((SELECT ID FROM Device WHERE model = 'iPhone 15 Plus'), '512GB'),
+((SELECT ID FROM Device WHERE model = 'iPhone 14'), '128GB'),
+((SELECT ID FROM Device WHERE model = 'iPad Air (5th Gen)'), '256GB'),
+((SELECT ID FROM Device WHERE model = 'MacBook Pro 14-inch (M3 Pro)'), '1TB'),
+((SELECT ID FROM Device WHERE model = 'MacBook Pro 16-inch (M3 Max)'), '2TB');
+
+
+CREATE TABLE Device_UnifiedMemory (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    device_id INT NOT NULL,
+    unified_memory VARCHAR(50) NOT NULL,  -- Stored as string to support variations like "16GB RAM"
+    FOREIGN KEY (device_id) REFERENCES Device(ID) ON DELETE CASCADE
+);
+INSERT INTO Device_UnifiedMemory (device_id, unified_memory) VALUES
+(1, '8GB RAM'),   -- iPhone 15 Pro Max
+(2, '8GB RAM'),   -- iPad Pro 12.9
+(3, '16GB RAM'),  -- MacBook Air M2 15-inch
+(4, '4GB RAM'),   -- iPhone SE (2022)
+(5, '6GB RAM'),   -- iPhone 15
+(6, '6GB RAM'),   -- iPhone 15 Plus
+(7, '6GB RAM'),   -- iPhone 14
+(8, '8GB RAM'),   -- iPad Air (5th Gen)
+(9, '18GB RAM'),  -- MacBook Pro 14-inch (M3 Pro)
+(10, '36GB RAM'); -- MacBook Pro 16-inch (M3 Max)
+
+CREATE TABLE user_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type_name ENUM('normal_user', 'admin') UNIQUE NOT NULL
+);
+
+-- Insert default user types
+INSERT INTO user_types (type_name) VALUES ('normal_user'), ('admin');
+
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    firstname VARCHAR(50) NOT NULL,
+    lastname VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL, -- Store hashed password
+    phone VARCHAR(20),
+    address TEXT,
+    user_type INT, -- Reference to user_types table
+    reset_token VARCHAR(255),
+    reset_token_expiry DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_type) REFERENCES user_types(id) ON DELETE SET NULL
+);
+
+
+INSERT INTO users (firstname, lastname, email, password, phone, address, user_type)
+VALUES (
+    'Admin', 
+    'User', 
+    'admin@example.com', 
+    'a3K2hQe3K98Cm35bOw68C5ShkGIKVhev6nYL8+EGlXSSdwuTPT37wC4tmNsfaUkZ', -- Replace with an actual hashed password
+    '+1234567890', 
+    '123 Admin Street, Admin City', 
+    2 -- The ID for 'admin' from user_types table
+);
+
+password encrpyted using openssl:
+openssl.exe enc -in .\text.txt -out text.enc -e -aes-128-ecb -pbkdf2 -md sha256 -pass pass:abracadabra -p -nosalt -base64
+
+Tudor -> Magma28fr!
+
+
+CREATE TABLE delivery_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name ENUM('default_delivery', 'default_billing') NOT NULL UNIQUE
+);
+INSERT INTO delivery_types (name) VALUES ('default_delivery'), ('default_billing');
+
+
+CREATE TABLE addresses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    type ENUM('normal_person', 'legal_person') NOT NULL,
+    county VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    full_address TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE address_delivery (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    address_id INT NOT NULL,
+    delivery_type_id INT NOT NULL,
+    FOREIGN KEY (address_id) REFERENCES addresses(id) ON DELETE CASCADE,
+    FOREIGN KEY (delivery_type_id) REFERENCES delivery_types(id) ON DELETE CASCADE
+);
+
+CREATE TABLE counties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE cities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    county_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    FOREIGN KEY (county_id) REFERENCES counties(id) ON DELETE CASCADE
+);
+-- Insert counties
+INSERT INTO counties (name) VALUES 
+('București'),
+('Cluj'),
+('Timiș'),
+('Iași'),
+('Constanța'),
+('Brașov'),
+('Dolj'),
+('Sibiu'),
+('Galați'),
+('Prahova');
+
+-- Insert cities
+INSERT INTO cities (county_id, name) VALUES 
+((SELECT id FROM counties WHERE name = 'București'), 'București'),
+((SELECT id FROM counties WHERE name = 'Cluj'), 'Cluj-Napoca'),
+((SELECT id FROM counties WHERE name = 'Timiș'), 'Timișoara'),
+((SELECT id FROM counties WHERE name = 'Iași'), 'Iași'),
+((SELECT id FROM counties WHERE name = 'Constanța'), 'Constanța'),
+((SELECT id FROM counties WHERE name = 'Brașov'), 'Brașov'),
+((SELECT id FROM counties WHERE name = 'Dolj'), 'Craiova'),
+((SELECT id FROM counties WHERE name = 'Sibiu'), 'Sibiu'),
+((SELECT id FROM counties WHERE name = 'Galați'), 'Galați'),
+((SELECT id FROM counties WHERE name = 'Prahova'), 'Ploiești');

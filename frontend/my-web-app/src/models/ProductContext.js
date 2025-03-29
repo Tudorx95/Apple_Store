@@ -1,48 +1,34 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { encryptData, decryptData } from '../components/common/Cryptography';
 
 const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isProductLoaded, setIsProductLoaded] = useState(false); // Track if product is loaded after decryption
+  const [isProductLoaded, setIsProductLoaded] = useState(false);
 
   useEffect(() => {
-    const loadProductFromStorage = async () => {
-      const savedProduct = sessionStorage.getItem("selectedProduct");
+    const loadProductFromStorage = () => {
+      const savedProduct = localStorage.getItem("selectedProduct");
       if (savedProduct) {
-        const { encryptedData, iv } = JSON.parse(savedProduct);
         try {
-          const decryptedProduct = await decryptData(encryptedData, iv);  // Decrypt product data
-          setSelectedProduct(decryptedProduct);
-          setIsProductLoaded(true);
+          setSelectedProduct(JSON.parse(savedProduct));
         } catch (error) {
-          console.error("Error decrypting product:", error);
-          setIsProductLoaded(true); // Avoid being stuck loading if decryption fails
+          console.error("Error parsing product from localStorage:", error);
         }
-      } else {
-        setIsProductLoaded(true); // No product to load, set as loaded
       }
+      setIsProductLoaded(true);
     };
-
     loadProductFromStorage();
   }, []);
 
-  // Save product to sessionStorage when selectedProduct changes
   useEffect(() => {
-    const storeProduct = async () => {
-      if (selectedProduct) {
-        const { encryptedData, iv } = await encryptData(selectedProduct); // Encrypt product data
-        sessionStorage.setItem("selectedProduct", JSON.stringify({ encryptedData, iv }));
-      }
-    };
     if (isProductLoaded && selectedProduct) {
-      storeProduct();
+      localStorage.setItem("selectedProduct", JSON.stringify(selectedProduct));
     }
   }, [selectedProduct, isProductLoaded]);
 
   const clearSelectedProduct = () => {
-    sessionStorage.removeItem("selectedProduct");
+    localStorage.removeItem("selectedProduct");
     setSelectedProduct(null);
   };
 
@@ -51,7 +37,7 @@ export const ProductProvider = ({ children }) => {
       selectedProduct,
       setSelectedProduct,
       clearSelectedProduct,
-      isProductLoaded // Passing loading state as well
+      isProductLoaded
     }}>
       {children}
     </ProductContext.Provider>

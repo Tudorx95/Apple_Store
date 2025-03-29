@@ -45,6 +45,8 @@ const SearchBar = () => {
 
     if (matchedProduct) {    
       setNoResults(false); 
+      setSearchTerm("");
+      setIsOpen(false);
       navigate(`/${matchedProduct.device_type}?model=${matchedProduct.model}`);
     } else {
       setNoResults(true); 
@@ -57,28 +59,32 @@ const SearchBar = () => {
     setSearchTerm(query);
 
     if (query.length >= 3) { // Start searching after 3 characters
-      fetchProductModels();
       setNoResults(false);
 
       // Filter models based on the search term
       const filtered = models.filter((product) =>
         product.model.toLowerCase().includes(query.toLowerCase())
       );
-      setFilteredModels(filtered); // Update the filtered models
+      setFilteredModels(filtered); // Update the suggestion list
+      
+
     } else {
-      setFilteredModels([]); // Clear the filtered models if the search term is empty or too short
+      setFilteredModels([]); // Clear the suggestion list if the search term is empty or too short
     }
   };
 
   const handleSuggestionClick = (model) => {
     setSearchTerm(""); // Set searchTerm to the selected model
-    setFilteredModels([]); // Clear suggestions
+    setFilteredModels([]); // Clear suggestions list
     setNoResults(false); // Hide "No results found" message
     navigate(`/${model.device_type}?model=${model.model}`); // Navigate to the matched product
   };
 
-   // Close the search bar when ESC is pressed
-   useEffect(() => {
+  useEffect(() => {
+
+    fetchProductModels();
+
+     // Close the search bar when ESC is pressed
     const handleEscape = (e) => {
       if (e.key === "Escape") {
         setIsOpen(false); // Close the search bar

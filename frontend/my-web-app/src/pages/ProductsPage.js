@@ -64,9 +64,16 @@ const ProductsPage = () => {
  
      // If a model is provided, filter the products
      if (modelSearch) {
-       result = result.filter(product =>
-         product.model.toLowerCase().includes(modelSearch.toLowerCase())
-       );
+       setFilters(prev => {
+      // Verifică dacă modelul există deja în filtre pentru a evita duplicarea
+      if (!prev.model.includes(modelSearch)) {
+        return {
+          ...prev,
+          model: [...prev.model, modelSearch]
+        };
+      }
+      return prev;
+    });
      }
 
     // Filter by model
@@ -153,13 +160,32 @@ const ProductsPage = () => {
       if (typeof prev[filterType] === "boolean") {
         // Handle boolean filters
         return { ...prev, [filterType]: value };
-      } // else handler the list/array items
+      } // else handle the list/array items
       else if (Array.isArray(prev[filterType])) {
 
       let updatedArray = [...prev[filterType]];
-  
+      // Dacă deselectăm un model și există un parametru model în URL,
+      // verifică dacă modelul deselecțat corespunde cu modelul din URL
+      // precum in cazul in care cautam Macb si optiunea includes face verificari partiale
+      // 
       if (updatedArray.includes(value)) {
         updatedArray = updatedArray.filter(item => item !== value);
+        if (filterType === 'model') {
+          const searchParams = new URLSearchParams(location.search);
+          const modelSearch = searchParams.get('model');
+          
+          // Dacă modelul deselectat este modelul din URL sau îl conține
+          // elimină parametrul din URL
+          if (modelSearch && (value === modelSearch || value.includes(modelSearch) || modelSearch.includes(value))) {
+            // Curăță URL-ul de parametrul model
+            searchParams.delete('model');
+            // Actualizează URL-ul fără a reîncărca pagina
+            const newUrl = 
+              `${location.pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+            window.history.pushState({}, '', newUrl);
+          }
+        }
+
       } else {
         updatedArray.push(value);
       }
@@ -339,9 +365,9 @@ const ProductsPage = () => {
                 </div>
                 <div className="product-info">
                   <h3>{product.model}</h3>
-                  <p className="product-color">Color: {product.color}</p>
+                  <p className="product-color">Color: {product.colors}</p>
                   <p className="product-specs">
-                    {product.specs.CPU} • {product.specs.GPU} • {product.capacity}
+                    {product.CPU} • {product.GPU} • {product.capacities.split(',')[0]}
                   </p>
                   <p className="product-price">${Number(product.price).toFixed(2)}</p>
                   <Link 

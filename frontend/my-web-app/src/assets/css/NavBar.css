@@ -131,3 +131,74 @@
     cursor: pointer;
   }
 }
+
+/* AUTHENTICATION POPUP */
+.auth-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  z-index: 1000;
+}
+
+.auth-popup {
+  background: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 70px; /* Adjust to match the navbar height */
+  margin-right: 20px; /* Space from the right edge */
+  width: 250px; /* Adjust box width */
+}
+
+.auth-popup h3 {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: black;
+}
+
+.auth-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+}
+.auth-btn:hover {
+  background-color: #0056b3;
+}
+
+.account-btn {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+  text-align: center;
+}
+
+.account-btn:hover {
+  background-color: #b0ddda83;
+}
+
+.logout-btn {
+  background-color: red; /* Red background for logout */
+  color: white;
+  border: none;
+  margin-top: 10px; /* Adds space between the buttons */
+}
+.logout-btn:hover {
+  background-color: darkred; /* Darker red on hover */
+}
