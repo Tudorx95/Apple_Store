@@ -86,50 +86,47 @@ const Dashboard = () => {
 
   return (
     <div className="control-panel">
-      <div className="dashboard-container">
-      <div className="user-header">
-        <div className="user-circle">{user.firstname[0]}{user.lastname[0]}</div>
-        <div className="user-info">
-          <h1>{user.lastname} {user.firstname}</h1>
-          <p>{user.email}</p>
+      {/* Combined sidebar container */}
+      <div className="sidebar-container">
+        {/* User header section */}
+        <div className="user-header">
+          <div className="user-circle">{user.firstname[0]}{user.lastname[0]}</div>
+          <div className="user-info">
+            <h1>{user.lastname} {user.firstname}</h1>
+            <p>{user.email}</p>
+          </div>
         </div>
-      </div>
-        <div className="sidebar">
+        
+        {/* Navigation options */}
+        <nav className="sidebar-nav">
           <ul>
-            <li 
-              className={activeSection === 'recent-orders' ? 'active' : ''}
-              onClick={() => setActiveSection('recent-orders')}
-            >
+            <li className={activeSection === 'recent-orders' ? 'active' : ''}
+                onClick={() => setActiveSection('recent-orders')}>
               Recent orders
             </li>
-            <li 
-              className={activeSection === 'personal-data' ? 'active' : ''}
-              onClick={() => setActiveSection('personal-data')}
-            >
+            <li className={activeSection === 'personal-data' ? 'active' : ''}
+                onClick={() => setActiveSection('personal-data')}>
               Personal data
             </li>
-            <li 
-              className={activeSection === 'address' ? 'active' : ''}
-              onClick={() => setActiveSection('address')}
-            >
+            <li className={activeSection === 'address' ? 'active' : ''}
+                onClick={() => setActiveSection('address')}>
               Address
             </li>
-            <li 
-              className={activeSection === 'my-orders' ? 'active' : ''}
-              onClick={() => setActiveSection('my-orders')}
-            >
+            <li className={activeSection === 'my-orders' ? 'active' : ''}
+                onClick={() => setActiveSection('my-orders')}>
               My orders
             </li>
           </ul>
-        </div>
-        <div className="main-content">
-          <div className="centered-content">
-              {renderSection()}
-          </div>
+        </nav>
+      </div>
+      
+      {/* Main content area */}
+      <div className="main-content">
+        <div className="centered-content">
+          {renderSection()}
         </div>
       </div>
     </div>
-
   );
 };
 
