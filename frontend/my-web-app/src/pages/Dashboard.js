@@ -85,20 +85,20 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="control-panel">
+    <div className="dashboard-page">
       {/* Combined sidebar container */}
-      <div className="sidebar-container">
+      <div className="dashboard-sidebar">
         {/* User header section */}
-        <div className="user-header">
-          <div className="user-circle">{user.firstname[0]}{user.lastname[0]}</div>
-          <div className="user-info">
+        <div className="dashboard-user-header">
+          <div className="dashboard-user-circle">{user.firstname[0]}{user.lastname[0]}</div>
+          <div className="dashboard-user-info">
             <h1>{user.lastname} {user.firstname}</h1>
             <p>{user.email}</p>
           </div>
         </div>
         
         {/* Navigation options */}
-        <nav className="sidebar-nav">
+        <nav className="dashboard-nav">
           <ul>
             <li className={activeSection === 'recent-orders' ? 'active' : ''}
                 onClick={() => setActiveSection('recent-orders')}>
@@ -121,8 +121,8 @@ const Dashboard = () => {
       </div>
       
       {/* Main content area */}
-      <div className="main-content">
-        <div className="centered-content">
+      <div className="dashboard-main">
+        <div className="dashboard-centered-content">
           {renderSection()}
         </div>
       </div>

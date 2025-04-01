@@ -349,3 +349,103 @@
   border: 1px solid #f5c6cb;
   font-size: 0.95em;
 }
+
+/* Address card styling */
+.address-card {
+  position: relative;
+  padding: 15px;
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Colored borders */
+.delivery-border {
+  border-left: 4px solid #007bff;
+}
+
+.billing-border {
+  border-right: 4px solid #28a745;
+}
+
+/* Status labels */
+.delivery-label {
+  color: #007bff;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.billing-label {
+  color: #28a745;
+  font-weight: bold;
+}
+
+/* Action buttons */
+.set-delivery-btn {
+  background: #007bff;
+  color: white;
+  /* other button styles */
+}
+
+.set-billing-btn {
+  background: #28a745;
+  color: white;
+  /* other button styles */
+}
+
+/* AddressMng.css additions */
+
+.address-card {
+  /* existing styles */
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.default-delivery {
+  border-left-color: #007bff;
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.default-billing {
+  border-right-color: #28a745;
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+.default-delivery.default-billing {
+  border-left-color: #007bff;
+  border-right-color: #28a745;
+}
+
+.delivery-badge {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-right: 5px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.billing-badge {
+  display: inline-block;
+  background-color: #28a745;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.set-delivery-btn {
+  background-color: #007bff;
+  color: white;
+  /* other button styles */
+}
+
+.set-billing-btn {
+  background-color: #28a745;
+  color: white;
+  /* other button styles */
+}

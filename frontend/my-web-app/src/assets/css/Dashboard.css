@@ -1,13 +1,14 @@
 /* src/assets/css/Dashboard.css */
 
-.control-panel {
+/* Dashboard-specific styles - won't affect HomePage */
+.dashboard-page {
   display: flex;
   min-height: 100vh;
   background: #f5f5f5;
 }
 
-/* Combined user header and sidebar container */
-.sidebar-container {
+/* Combined sidebar container */
+.dashboard-sidebar {
   width: 250px;
   background: #ffffff;
   position: sticky;
@@ -16,18 +17,16 @@
   border-right: 1px solid #ddd;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  display: flex;
-  flex-direction: column;
 }
 
 /* User header styling */
-.user-header {
+.dashboard-user-header {
   padding: 25px;
   text-align: center;
   border-bottom: 1px solid #eee;
 }
 
-.user-circle {
+.dashboard-user-circle {
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -41,32 +40,30 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.user-info h1 {
+.dashboard-user-info h1 {
   font-size: 20px;
   color: #333;
   margin: 0;
 }
 
-.user-info p {
+.dashboard-user-info p {
   font-size: 14px;
   color: #666;
   margin: 5px 0 0;
 }
 
 /* Sidebar navigation */
-.sidebar-nav {
-  flex: 1;
-  overflow-y: auto;
+.dashboard-nav {
   padding: 10px 0;
 }
 
-.sidebar-nav ul {
+.dashboard-nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.sidebar-nav li {
+.dashboard-nav li {
   padding: 12px 25px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -75,11 +72,11 @@
   border-left: 4px solid transparent;
 }
 
-.sidebar-nav li:hover {
+.dashboard-nav li:hover {
   background: #f0f8ff;
 }
 
-.sidebar-nav li.active {
+.dashboard-nav li.active {
   background: #f0f8ff;
   border-left: 4px solid #007bff;
   color: #007bff;
@@ -87,13 +84,13 @@
 }
 
 /* Main content area */
-.main-content {
+.dashboard-main {
   flex: 1;
   padding: 30px;
   background: #f5f5f5;
 }
 
-.centered-content {
+.dashboard-centered-content {
   max-width: 800px;
   margin: 0 auto;
   background: white;
@@ -104,21 +101,21 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .control-panel {
+  .dashboard-page {
     flex-direction: column;
   }
 
-  .sidebar-container {
+  .dashboard-sidebar {
     width: 100%;
     height: auto;
     position: static;
   }
 
-  .main-content {
+  .dashboard-main {
     padding: 20px;
   }
 
-  .centered-content {
+  .dashboard-centered-content {
     padding: 20px;
   }
 }

@@ -38,7 +38,7 @@ router.post("/login", async (req, res) => {
         process.env.REFRESH_SECRET,
         { expiresIn: "7d" } // Long-lived refresh token
     );
-    console.log(user);
+    //console.log(user);
     const id = user[0].id;
     // Send the generated tokens
     res.json({ token, id });

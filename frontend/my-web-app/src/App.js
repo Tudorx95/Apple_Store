@@ -15,6 +15,7 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './models/AuthProvider';
+import Cart from './pages/Cart';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -50,6 +51,7 @@ function App() {
                 <Route path="/macbook" element={<ProductsPage />} />
                 <Route path="/ipad" element={<ProductsPage />} />
                 <Route path="/iphone" element={<ProductsPage />} />
+                <Route path='/cart' element={<Cart />} />
                 <Route path="/service" element={<div>Service Page (Coming Soon)</div>} />
                 <Route path="/product/:deviceType/:productId" element={<ProductDetails />} />
               </Routes>

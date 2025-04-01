@@ -170,39 +170,35 @@ router.put('/addresses/:addressId/default', async (req, res) => {
   try {
     const { addressId } = req.params;
     const { addressType } = req.body;
-
-    // First get the delivery type ID
-    const [deliveryTypes] = await db.promise().execute(
-      `SELECT id FROM delivery_types WHERE name = ?`,
-      [`default_${addressType}`]
-    );
-
-    if (!deliveryTypes || deliveryTypes.length === 0) {
-      return res.status(404).json({
+    
+    if (!['delivery', 'billing'].includes(addressType)) {
+      return res.status(400).json({
         success: false,
-        message: `Delivery type 'default_${addressType}' not found`
+        message: 'Invalid address type. Must be "delivery" or "billing"'
       });
     }
 
-    const deliveryTypeId = deliveryTypes[0].id; // Correctly access the ID
+    // extract user ID
+    const [rows,field] = await db.promise().execute(
+      `SELECT user_id FROM addresses WHERE id = ?`, [addressId]
+    ); 
+    const userId = rows[0].user_id;   
 
-    // Clear any existing defaults of this type for this user
-    await db.promise().execute(
-      `DELETE FROM address_delivery 
-       WHERE address_id IN (
-         SELECT id FROM addresses 
-         WHERE user_id = (SELECT user_id FROM addresses WHERE id = ?)
-       ) AND delivery_type_id = ?`,
-      [addressId, deliveryTypeId]
+     // Reset all default addresses of this type for the user
+     await db.promise().execute(
+      `UPDATE addresses 
+       SET default_${addressType} = FALSE 
+       WHERE user_id = ? AND id != ?`,
+      [userId, addressId]
     );
 
-    // Set the new default
-    await db.promise().execute(
-      `INSERT INTO address_delivery (address_id, delivery_type_id)
-       VALUES (?, ?)
-       ON DUPLICATE KEY UPDATE delivery_type_id = VALUES(delivery_type_id)`,
-      [addressId, deliveryTypeId]
-    );
+   // Set the new default address
+   await db.promise().execute(
+    `UPDATE addresses 
+     SET default_${addressType} = TRUE 
+     WHERE id = ?`,
+    [addressId]
+  );
 
     res.json({ 
       success: true,

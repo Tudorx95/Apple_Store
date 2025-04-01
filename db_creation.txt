@@ -366,6 +366,8 @@ CREATE TABLE addresses (
     county VARCHAR(100) NOT NULL,
     city VARCHAR(100) NOT NULL,
     full_address TEXT NOT NULL,
+    default_delivery BOOLEAN DEFAULT NULL,
+    default_billing BOOLEAN DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -413,3 +415,25 @@ INSERT INTO cities (county_id, name) VALUES
 ((SELECT id FROM counties WHERE name = 'Sibiu'), 'Sibiu'),
 ((SELECT id FROM counties WHERE name = 'Galați'), 'Galați'),
 ((SELECT id FROM counties WHERE name = 'Prahova'), 'Ploiești');
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    device_id INT NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    quantity INT NOT NULL DEFAULT 1,
+    price DECIMAL(10, 2) NOT NULL,  -- Store the price of the order at the time of the order
+    status ENUM('pending', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',  -- Order status
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (device_id) REFERENCES device(id)
+);
+
+CREATE TABLE order_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    address_delivery_id INT NOT NULL,    
+    price DECIMAL(10, 2) NOT NULL,  -- useful when the data is modified later
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (address_delivery_id) REFERENCES addresses(id)
+);

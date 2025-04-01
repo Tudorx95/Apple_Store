@@ -75,7 +75,8 @@ const [formErrors, setFormErrors] = useState({});
       let response;
       if (editingAddress || address) {
         // Update existing address
-        response = await axios.put(`/api/addresses/update-default/${address.id}`, {
+        const addressID= (editingAddress ? editingAddress.id : address.id);
+        response = await axios.put(`/api/addresses/update-default/${addressID}`, {
           ...formData,
           userType
           

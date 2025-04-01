@@ -45,6 +45,9 @@ const NavBar = () => {
     setAuthPopupOpen(false);
   };
 
+  const handleCart = () => {
+    navigate('cart');
+  };
   
   const handleLogout = () => {
     logout(); // Call logout function to clear token
@@ -111,7 +114,7 @@ const NavBar = () => {
           <button className="user-btn" onClick={handleAuthClick}>
             <img src={personIcon} alt="User" className="navbar-user-avatar" />
           </button>
-          <button className="cart-btn">
+          <button className="cart-btn" onClick={handleCart}>
             <img src={cartIcon} alt="Cart" className="navbar-cart-icon" />
           </button>
         </div>
