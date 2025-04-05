@@ -166,7 +166,7 @@ const AddressManagement = ({ user }) => {
   const renderAddressCards = () => {
     return addresses.map(addr => {
       // Determine if address is default for delivery/billing
-      console.log(addr)
+      
       const isDelivery = addr.is_default_delivery || addr.deliveryTypes?.includes('default_delivery');
       const isBilling = addr.is_default_billing || addr.deliveryTypes?.includes('default_billing');
 

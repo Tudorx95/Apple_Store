@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
                 const response = await fetch(`/user/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-
+                
                 if (!response.ok) {
                     logout(); // If API validation fails, logout
                 }

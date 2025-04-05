@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import '../assets/css/ProductDetails.css';
 import { useProduct } from '../models/ProductContext';
 
 const ProductDetails = () => {
   const { productId } = useParams();
+  const navigate = useNavigate();
   const { selectedProduct, setSelectedProduct } = useProduct();
   const [isProductLoaded, setIsProductLoaded] = useState(false);
   const [additionalImages, setAdditionalImages] = useState([]);
@@ -17,15 +18,16 @@ const ProductDetails = () => {
     capacities: [],
     cpus: [],
     gpus: [],
-    unifiedmemories: []
+    unifiedmemories: [],
   });
   const [selectedConfig, setSelectedConfig] = useState({
     color: '',
     capacity: '',
     cpu: '',
     gpu: '',
-    unified_memories: ''
+    unified_memories: '',
   });
+  const [popup, setPopup] = useState({ show: false, message: '', hasButton: false }); // Nou: stare pentru popup
 
   useEffect(() => {
     if (selectedProduct) {
@@ -60,7 +62,7 @@ const ProductDetails = () => {
           capacity: data.capacities[0] || '',
           cpu: data.cpus[0] || '',
           gpu: data.gpus[0] || '',
-          unified_memories: data.unifiedmemories[0] || ''
+          unified_memories: data.unifiedmemories[0] || '',
         });
       } else {
         console.error('Failed to fetch configurations:', response.statusText);
@@ -74,9 +76,66 @@ const ProductDetails = () => {
     setSelectedConfig({ ...selectedConfig, [e.target.name]: e.target.value });
   };
 
-  const handleAddToCart = () => {
-    alert(`${selectedProduct.model} (${selectedConfig.color}, ${selectedConfig.capacity}, ${selectedConfig.cpu}, ${selectedConfig.gpu}, ${selectedConfig.unified_memories}) added to cart!`);
+  const handleAddToCart = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      setPopup({
+        show: true,
+        message: "User not logged in.",
+        hasButton: true,
+      });
+      return;
+    }
+
+    const order_exists = localStorage.getItem("orderId");
+    console.log(order_exists);
+
+    const payload = {
+      userId,
+      productId: selectedProduct.ID,
+      quantity: 1,
+      price: selectedProduct.price,
+      order_exists: order_exists ? true : false,
+      orderId: order_exists || null,
+    };
+
+    try {
+      const response = await fetch("/api/products/addToCart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setPopup({
+          show: true,
+          message: "Product added to cart successfully!",
+          hasButton: false,
+        });
+        if (data.findOrderId) {
+          localStorage.setItem("orderId", data.findOrderId);
+        }
+      } else {
+        setPopup({
+          show: true,
+          message: `Error: ${data.message}`,
+          hasButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      setPopup({
+        show: true,
+        message: "An error occurred while adding to cart.",
+        hasButton: false,
+      });
+    }
   };
+
+  const closePopup = () => setPopup({ show: false, message: '', hasButton: false });
 
   if (!isProductLoaded) {
     return <div className="error">Product not found. Please navigate from the product list.</div>;
@@ -92,7 +151,6 @@ const ProductDetails = () => {
     setEnlargedImage(null);
   };
 
-
   return (
     <div className="product-details-container">
       <div className="product-details-content">
@@ -102,28 +160,28 @@ const ProductDetails = () => {
 
         <div className="product-details-info">
           <h1 className="product-title">{selectedProduct.model}</h1>
-          
+
           <label>Color:</label>
           <select className='custom-select' name="color" value={selectedConfig.color} onChange={handleConfigChange}>
             {configurations.colors.map((color, index) => (
               <option key={index} value={color}>{color}</option>
             ))}
           </select>
-          
+
           <label>Memory/Storage:</label>
           <select className='custom-select' name="capacity" value={selectedConfig.capacity} onChange={handleConfigChange}>
             {configurations.capacities.map((capacity, index) => (
               <option key={index} value={capacity}>{capacity}</option>
             ))}
           </select>
-          
+
           <label>CPU:</label>
           <select className='custom-select' name="cpu" value={selectedConfig.cpu} onChange={handleConfigChange}>
             {configurations.cpus.map((cpu, index) => (
               <option key={index} value={cpu}>{cpu}</option>
             ))}
           </select>
-          
+
           {configurations.gpus.length > 0 && (
             <>
               <label>GPU:</label>
@@ -145,7 +203,7 @@ const ProductDetails = () => {
               </select>
             </>
           )}
-          
+
           <p className="product-price-main">${Number(selectedProduct.price).toFixed(2)}</p>
           <p className="product-description">{selectedProduct.description}</p>
           <button className="add-to-cart-button" onClick={handleAddToCart}>Add to Cart</button>
@@ -188,6 +246,29 @@ const ProductDetails = () => {
         <div className="image-enlarged-overlay" onClick={closeEnlargedImage}>
           <div className="enlarged-image-container">
             <img src={enlargedImage} alt="Enlarged view" />
+          </div>
+        </div>
+      )}
+
+      {popup.show && (
+        <div className="popup-overlay" onClick={closePopup}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+            <p>{popup.message}</p>
+            {popup.hasButton ? (
+              <button
+                className="popup-button"
+                onClick={() => {
+                  closePopup();
+                  navigate('/login');
+                }}
+              >
+                Authenticate
+              </button>
+            ) : (
+              <button className="popup-button" onClick={closePopup}>
+                OK
+              </button>
+            )}
           </div>
         </div>
       )}

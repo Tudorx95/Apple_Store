@@ -1,203 +1,418 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import '../assets/css/Cart.css';
+import { useAuth } from '../models/AuthProvider';
+import { useNavigate } from 'react-router-dom';
+import '../assets/css/Cart.css'
 
-const Cart = ({ user }) => {
+const CartPage = () => {
+  const { token, userId, isTokenExpired } = useAuth();
+  const navigate = useNavigate();
+
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [total, setTotal] = useState(0);
-  
-  // Fetch cart items
-  useEffect(() => {
-    if (!user) return;
-    
-    const fetchCartItems = async () => {
-      try {
-        setLoading(true);
-        // TODO: Replace with actual API endpoint to fetch cart items
-        // const response = await axios.get(`/api/cart/${user.id}`);
-        // setCartItems(response.data);
-        
-        // Mock data for development - replace with actual API call
-        setCartItems([
-          {
-            id: 1,
-            device_id: 1,
-            name: 'iPhone 14 128GB Midnight',
-            sku: 'MPUF3RX/A',
-            price: 2999.99,
-            quantity: 1,
-            image: '/images/iphone14.jpg' // Path to image
-          }
-        ]);
-        
-        // Calculate total
-        calculateTotal();
-      } catch (err) {
-        console.error("Error fetching cart items:", err);
-        setError("Failed to load your cart. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchCartItems();
-  }, [user]);
-  
-  // Calculate cart total
-  const calculateTotal = () => {
-    // TODO: Replace with actual calculation from cart items
-    setTotal(2999.99);
-  };
-  
-  // Update item quantity
-  const updateQuantity = async (itemId, newQuantity) => {
-    if (newQuantity < 1) return;
-    
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [couponCode, setCouponCode] = useState('');
+  const [freeShipping, setFreeShipping] = useState(true);
+
+  // Fetch cart items from the database
+  const fetchCartItems = async () => {
     try {
-      // TODO: Implement API call to update quantity
-      // await axios.put(`/api/cart/item/${itemId}`, { quantity: newQuantity });
+      setLoading(true);
+
+      if (!userId || isTokenExpired(token)) {
+        if (!localStorage.getItem("loggedOut")) {
+          alert("User is not logged in or token is expired!");
+          localStorage.setItem("loggedOut", "true"); // Prevent duplicate alerts
+          navigate('/login');
+        }
+        return;
+      }
+      localStorage.removeItem("loggedOut");
+
+      const orderId = localStorage.getItem("orderId");
+      if (!orderId) {
+        
+        return;
+      }
+
+      // Get the pending orders for the current user
+      const response = await fetch(`/api/products/${userId}/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       
-      // Update local state
-      const updatedItems = cartItems.map(item => 
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      );
-      
-      setCartItems(updatedItems);
-      calculateTotal();
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert("Session expired or invalid token!");
+          navigate('/login');
+          return;
+        }
+        else if (response.status === 404)
+            {
+              //console.log(response.message);
+              localStorage.removeItem("orderId");
+              return;
+            }
+          //throw new Error('Failed to fetch cart items');
+      }
+
+      const data = await response.json();
+      console.log("Data:", data);
+
+      // Setează array-ul corect din data.data
+      const items = data.data || [];
+      setCartItems(items);
+
+      // Calculează totalul folosind items
+      const total = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+      setTotalPrice(total);
+
     } catch (err) {
-      console.error("Error updating quantity:", err);
-      setError("Failed to update quantity. Please try again.");
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
-  
+
+  useEffect(() => {
+
+    // eliminate any coupon used earlier
+    localStorage.removeItem("couponId");
+
+    if (userId && token) {
+      fetchCartItems();
+    } else {
+      navigate('/login');
+    }
+  }, [userId, token, navigate, isTokenExpired]);
+
+  // Update quantity of an item
+  const updateQuantity = async (itemId, newQuantity) => {
+    if (newQuantity < 1) {
+      removeItem(itemId);
+      return;
+    }
+
+    try {
+      const orderId = localStorage.getItem('orderId');
+      const response = await fetch(`/api/products/Quantity/${userId}/${orderId}/${itemId}`, {
+        method: 'PATCH',  
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quantity: newQuantity }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update quantity');
+      }
+
+      // Update local state
+      const updatedItems = cartItems.map(item =>
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      );
+
+      setCartItems(updatedItems);
+
+      // Recalculate total
+      const total = updatedItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+      setTotalPrice(total);
+
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   // Remove item from cart
   const removeItem = async (itemId) => {
     try {
-      // TODO: Implement API call to remove item
-      // await axios.delete(`/api/cart/item/${itemId}`);
-      
+      const orderId = localStorage.getItem('orderId');
+      const response = await fetch(`/api/products/RemoveItem/${userId}/${orderId}/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove item');
+      }
+      console.log(cartItems.length);
+      fetchCartItems();
+      if(cartItems.length === 0)
+      {
+        localStorage.removeItem("orderId");
+      }
       // Update local state
       const updatedItems = cartItems.filter(item => item.id !== itemId);
       setCartItems(updatedItems);
-      calculateTotal();
+
+      // Recalculate total
+      const total = updatedItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+      setTotalPrice(total);
+
     } catch (err) {
-      console.error("Error removing item:", err);
-      setError("Failed to remove item. Please try again.");
+      setError(err.message);
     }
   };
+
   
-  // Handle checkout
-  const handleCheckout = () => {
-    // TODO: Implement checkout logic - redirect to checkout page or process order
-    console.log("Proceeding to checkout");
+ // Handle coupon code
+const handleCouponSubmit = async (e) => {
+  e.preventDefault();
+  
+  try {
+    const exists_coupon = localStorage.getItem('couponId');
+    if(exists_coupon)
+    {
+      alert("A coupon was already used!");
+      return;
+    }
+
+    const response = await fetch('/api/products/coupon/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ code: couponCode }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Invalid coupon code');
+    }
+
+    const data = await response.json();
+    console.log(data);
+    
+    // Calculate the discount amount
+    let discountAmount = 0;
+
+    if (data.discountType === 'percentage') {
+      discountAmount = (totalPrice * data.discountValue) / 100;
+
+      // Ensure it does not exceed max discount allowed
+      if (data.maxDiscount && discountAmount > data.maxDiscount) {
+        discountAmount = data.maxDiscount;
+      }
+    } else if (data.discountType === 'fixed_amount') {
+      discountAmount = data.discountValue;
+    }
+
+    // Ensure minimum purchase requirement is met
+    if (totalPrice < data.minPurchase) {
+      alert(`Coupon requires a minimum purchase of $${data.minPurchase}`);
+      return;
+    }
+    localStorage.setItem("couponId",couponCode);
+    // Calculate the new total price after applying the discount
+    const newTotal = totalPrice - discountAmount;
+
+    // Update total price state
+    setTotalPrice(newTotal);
+
+    alert(`Coupon applied! You saved $${discountAmount}!`);
+
+  } catch (err) {
+    setError(err.message);
+    setTimeout(() => setError(null), 3000);
+  }
+};
+
+  // Finalize order
+  const finalizeOrder = async () => {
+    // modify status in order_details, and the price
+    try {
+      const nb_orders = cartItems.length;
+      if(nb_orders<1)
+      {
+        return;
+      }
+      const response = await fetch(`/api/address-delivery/${userId}/${nb_orders}`,{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Error retrieving address ID');
+      }
+      
+      const data = await response.json();
+      const orderDetailsId = data.orderId;
+      
+
+      // const orderDetailsResponse = await fetch('/api/order-details', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify({
+      //     user_id: userId,
+      //     nb_orders: cartItems.length,
+      //     address_delivery_id: 1, // Default address ID for now
+      //   }),
+      // });
+
+      // if (!orderDetailsResponse.ok) {
+      //   throw new Error('Failed to create order details');
+      // }
+
+      //const orderDetails = await orderDetailsResponse.json();
+
+      const updateOrdersResponse = await fetch('/api/products/finalize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          order_id: orderDetailsId,
+          status: 'shipped',
+        }),
+      });
+
+      if (!updateOrdersResponse.ok) {
+        throw new Error('Failed to finalize order');
+      }
+
+      navigate('/order-confirmation', {
+        state: {
+          orderId: orderDetailsId,
+          totalAmount: totalPrice,
+        },
+      });
+
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  if (loading) return <div className="loading-spinner">Loading your cart...</div>;
-  if (error) return <div className="error-message">{error}</div>;
-  
+  if (loading) return <div className="text-center p-4">Loading your cart...</div>;
+
   return (
-    <div className="cart-container">
-      <h1>Shopping Cart</h1>
-      
-      <div className="cart-summary-top">
-        <h2>Total coș cumpărături {total.toLocaleString('ro-RO')} Lei</h2>
-        
-        <div className="shipping-info">
-          <span className="free-shipping">
-            <i className="check-icon"></i> Transport GRATUIT
-          </span>
+    <div className="cart-page-container">
+      <h1 className="cart-title">Total shopping cart {totalPrice.toFixed(2)} $</h1>
+
+      <div className="free-shipping-notice">
+        <div className="free-shipping-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
         </div>
-        
-        <button className="checkout-button" onClick={handleCheckout}>
-          Finalizare comandă
+        <span>Free shipping</span>
+      </div>
+
+      <div className="finalize-order-top">
+        <button onClick={finalizeOrder} className="btn-finalize">
+        Order completion
         </button>
       </div>
-      
+
       <div className="cart-divider"></div>
-      
-      <div className="cart-items">
-        {cartItems.length === 0 ? (
-          <div className="empty-cart">
-            <p>Your cart is empty.</p>
-          </div>
-        ) : (
-          cartItems.map(item => (
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
+      {cartItems.length === 0 ? (
+        <div className="empty-cart-message">
+          <p>Your shopping cart is empty.</p>
+        </div>
+      ) : (
+        <div className="cart-items">
+          {cartItems.map(item => (
             <div key={item.id} className="cart-item">
-              <div className="item-image">
-                {/* TODO: Replace with actual image */}
-                <img src={item.image || "https://placeholder.com/150"} alt={item.name} />
-              </div>
-              
               <div className="item-details">
-                <h3>{item.name}</h3>
-                <p className="item-sku">{item.sku}</p>
-              </div>
-              
-              <div className="item-quantity">
-                <button 
-                  className="quantity-btn minus"
-                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                  disabled={item.quantity <= 1}
-                >
-                  -
-                </button>
-                <input 
-                  type="text" 
-                  value={item.quantity} 
-                  readOnly 
+                <img
+                  src={"./images/" + item.image_url || '/placeholder-device.jpg'}
+                  alt={item.model}
+                  className="item-image"
                 />
-                <button 
-                  className="quantity-btn plus"
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                >
-                  +
+                <div className="item-info">
+                  <h3>{item.model}</h3>
+                  <p>Stock: {item.in_stock ? "In Stock" : "Ask stock"}</p>
+                </div>
+              </div>
+
+              <div className="item-actions">
+                <div className="quantity-selector">
+                  <button
+                    onClick={() => updateQuantity(item.id, (item.quantity || 1) - 1)}
+                    className="btn-decrease"
+                  >
+                    -
+                  </button>
+                  <span className="quantity-display">{item.quantity || 1}</span>
+                  <button
+                    onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                    className="btn-increase"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="item-price">
+                  <p>{(item.price * (item.quantity || 1)).toFixed(2)} $</p>
+                </div>
+
+                <button onClick={() => removeItem(item.id)} className="btn-remove">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-              
-              <div className="item-price">
-                {(item.price * item.quantity).toLocaleString('ro-RO')} Lei
-              </div>
-              
-              <button 
-                className="remove-item" 
-                onClick={() => removeItem(item.id)}
-              >
-                ✕
-              </button>
             </div>
-          ))
-        )}
-      </div>
-      
-      <div className="cart-actions">
-        <button className="update-cart-button">
-          Actualizează coșul de cumpărături
+          ))}
+        </div>
+      )}
+
+      <div>
+        <button className="btn-update-cart">
+        Update shopping cart
         </button>
       </div>
-      
-      <div className="cart-summary-box">
-        <h3>Sumarul coșului de cumpărături</h3>
-        
+
+      <div className="cart-summary">
+        <h2 className="summary-title">Shopping cart summary</h2>
+
         <div className="coupon-section">
-          <p>Dacă beneficiezi de un cupon de reducere, introdu codul aici.</p>
-          {/* TODO: Implement coupon functionality */}
+          <p className="coupon-text">If you have a discount coupon, enter the code here.</p>
+          <form onSubmit={handleCouponSubmit} className="coupon-form">
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              className="coupon-input"
+              placeholder="Cod cupon"
+            />
+            <button type="submit" className="btn-apply-coupon">
+            Apply
+            </button>
+          </form>
         </div>
-        
-        <div className="cart-total">
-          <div className="total-row">
-            <span>Total cu TVA</span>
-            <span className="price">{total.toLocaleString('ro-RO')} Lei</span>
-          </div>
+
+        <div className="total-section">
+          <span className="total-label">Total with VAT</span>
+          <span className="total-amount">{totalPrice.toFixed(2)} $</span>
         </div>
-        
-        <button className="checkout-button" onClick={handleCheckout}>
-          Finalizare comandă
-        </button>
+
+        <div>
+          <button onClick={finalizeOrder} className="btn-finalize-bottom">
+          Order completion
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Cart;
+export default CartPage;

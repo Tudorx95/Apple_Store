@@ -9,7 +9,6 @@ const router = express.Router();
 // Login route to authenticate user and generate tokens
 router.post("/login", async (req, res) => {
     const { identifier, password } = req.body;
-
     // Fetch user from DB
     const [user] = await db.promise().query(
         "SELECT id, email, password, user_type FROM users WHERE email = ? OR phone = ?",

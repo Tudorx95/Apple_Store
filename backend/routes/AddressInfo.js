@@ -87,6 +87,22 @@ router.get('/addresses/:userId', async (req,res)=>{
     }
   });
 
+  router.get('/address-delivery/:userId/:nb_orders', async (req,res) =>{
+    const {userId, nb_orders} = req.params;
+    try{
+      
+      const [orderRows] = await db.promise().execute(`select id from order_details 
+        where user_id = ? && nb_orders = ? && status = 'pending'`, [userId, nb_orders]);
+        if (orderRows.length === 0) {
+          return res.status(404).json({ message: "No pending order found" });
+        }
+        
+        res.status(201).json({ orderId: orderRows[0].id });
+    }catch (error) {
+      res.status(500).json({ message: 'Error fetching delivery types' });
+    }
+  });
+
   router.get('/address-delivery/:addressId', async (req, res) => {
     try {
       const { addressId } = req.params;

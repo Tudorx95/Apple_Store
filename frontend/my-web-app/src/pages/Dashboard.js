@@ -5,6 +5,7 @@ import { useAuth } from '../models/AuthProvider';
 import '../assets/css/Dashboard.css';
 import ModifyPersonalData from '../components/layout/PersonalData';
 import AddressManagement from '../components/layout/AddressMng';
+import MyOrders from '../components/layout/MyOrders';
 
 const Dashboard = () => {
   const { token, userId, logout } = useAuth(); // Get token and userId from context
@@ -44,9 +45,9 @@ const Dashboard = () => {
       case 'recent-orders':
         return (
           <div className="section-content">
-            <h2>Comenzi recente</h2>
+            <h2>Recent orders</h2>
             <div className="empty-state">
-              <p>Nu ai plasat nicio comandă.</p>
+              <p>You have not placed any orders.</p>
               <a href="/" className="go-to-home">Go to Home Page &gt;</a>
             </div>
           </div>
@@ -61,10 +62,7 @@ const Dashboard = () => {
         );
       case 'my-orders':
         return (
-          <div className="section-content">
-            <h2>Comenzile mele</h2>
-            <p>Urmărește și gestionează comenzile tale.</p>
-          </div>
+          <MyOrders />
         );
       default:
         return null;

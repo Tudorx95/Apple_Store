@@ -40,6 +40,7 @@ const NavBar = () => {
       navigate("dashboard"); // Navigate to dashboard if the token is valid
   } else {
       //setIsAuthenticated(true);
+      logout();
       navigate("login"); // Otherwise, navigate to login
     }
     setAuthPopupOpen(false);

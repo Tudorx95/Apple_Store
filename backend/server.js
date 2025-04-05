@@ -375,7 +375,7 @@ app.post('/api/register', async (req, res) => {
       // Respond with a success message
       return res.status(201).json({ message: 'Registration successful', userId: result.insertId });
     } catch (error) {
-      console.error('Error registering user: ', error);
+      console.error('Error registering user: ', error);     
       return res.status(500).json({ message: 'Internal server error' });
     }
   });
@@ -420,7 +420,8 @@ app.get('/dashboard', authMiddleware, (req, res) => {
     res.json({ message: `Welcome, ${req.user.email}` });
 });
 
-
+const ProductsRoute = require('./routes/ProductsRoute');
+app.use("/api/products",ProductsRoute);
 
 
 app.post('/logout', async (req, res) => {

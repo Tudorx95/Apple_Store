@@ -416,24 +416,46 @@ INSERT INTO cities (county_id, name) VALUES
 ((SELECT id FROM counties WHERE name = 'Galați'), 'Galați'),
 ((SELECT id FROM counties WHERE name = 'Prahova'), 'Ploiești');
 
-CREATE TABLE orders (
+CREATE TABLE order_details (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    nb_orders INT,
+    status ENUM('pending', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',  -- Order status
+    address_delivery_id INT,    
+    FOREIGN KEY (address_delivery_id) REFERENCES addresses(id)
+);
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     device_id INT NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    order_id INT NOT NULL,  -- pentru a determina obiectul de care comanda a userului apartine
+    FOREIGN KEY (order_id) REFERENCES order_details(id),
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     quantity INT NOT NULL DEFAULT 1,
     price DECIMAL(10, 2) NOT NULL,  -- Store the price of the order at the time of the order
-    status ENUM('pending', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',  -- Order status
-    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (device_id) REFERENCES device(id)
 );
 
-CREATE TABLE order_details (
+CREATE TABLE coupons (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    address_delivery_id INT NOT NULL,    
-    price DECIMAL(10, 2) NOT NULL,  -- useful when the data is modified later
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (address_delivery_id) REFERENCES addresses(id)
+    code VARCHAR(50) UNIQUE NOT NULL,
+    discount_type ENUM('percentage', 'fixed_amount') NOT NULL,
+    discount_value DECIMAL(10,2) NOT NULL,
+    min_purchase DECIMAL(10,2) DEFAULT 0.00,
+    max_discount DECIMAL(10,2) DEFAULT NULL,
+    valid_from DATE NOT NULL,
+    valid_until DATE NOT NULL,
+    usage_limit INT DEFAULT 1,
+    used_count INT DEFAULT 0,
+    status ENUM('active', 'expired', 'disabled') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+INSERT INTO coupons (code, discount_type, discount_value, min_purchase, max_discount, valid_from, valid_until, usage_limit, status)
+VALUES 
+('SUMMER10', 'percentage', 10, 50, 20, '2025-06-01', '2025-08-31', 100, 'active'),
+('WELCOME5', 'fixed_amount', 5, 20, NULL, '2025-01-01', '2025-12-31', 1, 'active'),
+('BLACKFRIDAY50', 'percentage', 50, 100, 50, '2025-11-25', '2025-11-30', 200, 'active');

@@ -54,7 +54,7 @@ const LoginPage = () => {
   }
    
    try{
-
+    
      const response = await fetch('/login', {
        method: 'POST',
        headers: { 'Content-Type': 'application/json' },
