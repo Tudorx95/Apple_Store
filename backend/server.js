@@ -22,7 +22,7 @@ app.use(cors({
     origin: process.env.REACT_APP_FRONTEND_URL, // Allow requests from your React frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow specific HTTP methods
     allowedHeaders: ['Content-Type', 'Authorization'] // Allow specific headers (you can add more if needed)
-  }));
+}));
 
 
 // Routes
@@ -36,8 +36,8 @@ app.get('/devices', (req, res) => {
     });
 });
 
-app.get('/device-promo',(req,res)=>{
-    db.query('SELECT * FROM Device_Promo', (err,results)=>{
+app.get('/device-promo', (req, res) => {
+    db.query('SELECT * FROM Device_Promo', (err, results) => {
         if (err) {
             res.status(500).json({ message: 'An error occurred while fetching data. Please try again later.' });
         } else {
@@ -48,7 +48,7 @@ app.get('/device-promo',(req,res)=>{
 
 app.post('/api/subscribe', (req, res) => {
     const { firstname, lastname, email } = req.body;
-    const loggedAt=new Date();
+    const loggedAt = new Date();
 
     if (!firstname || !lastname || !email) {
         return res.status(400).json({ message: 'All fields are required.' });
@@ -63,7 +63,7 @@ app.post('/api/subscribe', (req, res) => {
         }
 
         db.query('INSERT INTO Newsletter_user (firstname, lastname, email, subscribed_at) VALUES (?, ?, ?, ?)',
-            [firstname, lastname, email,loggedAt],
+            [firstname, lastname, email, loggedAt],
             (err, result) => {
                 if (err) {
                     return res.status(500).json({ message: 'Failed to subscribe. Try again later.' });
@@ -74,7 +74,7 @@ app.post('/api/subscribe', (req, res) => {
     });
 });
 
-app.get("/contact", (req,res)=>{
+app.get("/contact", (req, res) => {
     db.query('SELECT * FROM apple_stores', (err, results) => {
         if (err) {
             return res.status(500).json({ message: 'Database error', error: err });
@@ -83,14 +83,14 @@ app.get("/contact", (req,res)=>{
             ...store,
             latitude: parseFloat(store.latitude),
             longitude: parseFloat(store.longitude),
-            position: { 
-              lat: parseFloat(store.latitude), 
-              lng: parseFloat(store.longitude) 
+            position: {
+                lat: parseFloat(store.latitude),
+                lng: parseFloat(store.longitude)
             }
-          }));
-      
+        }));
+
         res.status(200).json(formattedResults);
-        
+
     });
 });
 
@@ -171,38 +171,38 @@ app.get("/products/iphone", (req, res) => {
 
 
 app.get('/products/models', async (req, res) => {
-      const query = `SELECT device.model, device_type.device_type, device.ID FROM device
+    const query = `SELECT device.model, device_type.device_type, device.ID FROM device
                      INNER JOIN device_type ON 
                      device.device_type = device_type.ID`;
-      
-      db.query(query,(err,results)=>{
-        if(err){
+
+    db.query(query, (err, results) => {
+        if (err) {
             return res.status(500).json({ message: "Database error", error: err });
         }
         res.json(results);
-      });   
-  });
+    });
+});
 
-  app.get('/products/images/:device_type/:ID', async (req, res) => {
+app.get('/products/images/:device_type/:ID', async (req, res) => {
     const deviceType = req.params.device_type;
     const productId = req.params.ID;
-  
+
     const query = `
       SELECT image_url FROM device_images
       WHERE device_ID = ?
     `;
-  
+
     db.query(query, [productId], (err, results) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({ message: "Database error", error: err });
-      }
-  
-      // If images are found, return them as an array of image URLs
-      const imageUrls = results.map(result => `/images/${result.image_url}`);
-      res.json(imageUrls);
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: "Database error", error: err });
+        }
+
+        // If images are found, return them as an array of image URLs
+        const imageUrls = results.map(result => `/images/${result.image_url}`);
+        res.json(imageUrls);
     });
-  });
+});
 
 app.get("/products/:device_type/:ID", (req, res) => {
     const { device_type, ID: deviceId } = req.params;
@@ -256,138 +256,72 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
     },
     tls: {
         rejectUnauthorized: false
     }
-  });
-
-
-  const {render} = require('@react-email/components');
-  const {Email} = require('./Email.js');
-  
-// Endpoint to handle password reset request
-app.post('/send-reset-email', async (req, res) => {
-
-    const { email } = req.body;
-  try {
-      // Search for the user in the database
-      const [user] = await db.promise().query('SELECT * FROM users WHERE email = ?', [email]);
-      
-      if (user.length === 0) {
-          return res.status(404).json({ message: 'User not found' });
-        }
-
-    // Generate a reset token (a random string)
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    const resetTokenExpiry = new Date(Date.now() + 3600000);  // 1 hour expiry time
-
-    // Save the token and its expiry in the database
-    await db.promise().query('UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?', [resetToken, resetTokenExpiry, email]);
-
-    // Send the reset link with the token
-    const resetLink = `${process.env.REACT_APP_FRONTEND_URL}/reset-password?token=${resetToken}`;
-
-
-    // Generate email HTML
-    const emailHtml = await render(Email({resetLink}));
-      // Email options
-      const mailOptions = {
-        from: process.env.EMAIL_USER, // Your sender email
-        to: email,
-        subject: 'Password Reset Request on Apple Store',
-        html: emailHtml,
-      };
-  
-      await transporter.sendMail(mailOptions);
-
-    return res.status(200).json({ message: 'Password reset email sent.' });
-  } catch (error) {
-    console.error('Error handling password reset:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
 });
 
-// Endpoint to handle password update
-app.post('/update-password', async (req, res) => {
-  const { resetToken, newPassword } = req.body;
-
-  try {
-    // Check if the reset token is valid and not expired
-    const [user] = await db.promise().query('SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()', [resetToken]);
-
-    if (user.length === 0) {
-      return res.status(400).json({ message: 'Invalid or expired reset token' });
-    }
-
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update the user's password and clear the reset token
-    await db.promise().query('UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?', [hashedPassword, resetToken]);
-
-    return res.status(200).json({ message: 'Password updated successfully.' });
-  } catch (error) {
-    console.error('Error updating password:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
+const { render } = require('@react-email/components');
+const { Email } = require('./Email.js');
 
 const bcrypt = require('bcrypt');
 // POST route to register a new user
 app.post('/api/register', async (req, res) => {
     const { firstname, lastname, email, password, phone, address, user_type } = req.body;
-  
+
     // Validate inputs
     if (!firstname || !lastname || !email || !password) {
-      return res.status(400).json({ message: 'Required fields are missing' });
+        return res.status(400).json({ message: 'Required fields are missing' });
     }
-  
+
     try {
-      // Check if the email already exists in the database
-      const [existingUser] = await db.promise().query('SELECT * FROM users WHERE email = ?', [email]);
-  
-      if (existingUser.length > 0) {
-        return res.status(400).json({ message: 'Email already exists' });
-      }
-  
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // constraint for admin users !!!
-      // Check if password meets the constraint (contains 2 $ and 1 #)
-      const dollarCount = (password.match(/\$/g) || []).length;
-      const hashCount = (password.match(/#/g) || []).length;
-      let finalUserType = user_type || 1;  // Default to normal user (1) if no type provided
-      if (dollarCount === 2 && hashCount === 1) {
-        finalUserType = 2;  // Admin user type (2)
-      }
+        // Check if the email already exists in the database
+        const [existingUser] = await db.promise().query('SELECT * FROM users WHERE email = ?', [email]);
+
+        if (existingUser.length > 0) {
+            return res.status(400).json({ message: 'Email already exists' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // constraint for admin users !!!
+        // Check if password meets the constraint (contains 2 $ and 1 #)
+        const dollarCount = (password.match(/\$/g) || []).length;
+        const hashCount = (password.match(/#/g) || []).length;
+        let finalUserType = user_type || 1;  // Default to normal user (1) if no type provided
+        if (dollarCount === 2 && hashCount === 1) {
+            finalUserType = 2;  // Admin user type (2)
+        }
 
 
-      // Insert user data into the database
-      const query = 'INSERT INTO users (firstname, lastname, email, password, phone, address, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)';
-      const values = [firstname, lastname, email, hashedPassword, phone || null, address || null, finalUserType || null];
-  
-      const [result] = await db.promise().query(query, values);
-  
-      // Respond with a success message
-      return res.status(201).json({ message: 'Registration successful', userId: result.insertId });
+        // Insert user data into the database
+        const query = 'INSERT INTO users (firstname, lastname, email, password, phone, address, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        const values = [firstname, lastname, email, hashedPassword, phone || null, address || null, finalUserType || null];
+
+        const [result] = await db.promise().query(query, values);
+
+        // Respond with a success message
+        return res.status(201).json({ message: 'Registration successful', userId: result.insertId });
     } catch (error) {
-      console.error('Error registering user: ', error);     
-      return res.status(500).json({ message: 'Internal server error' });
+        console.error('Error registering user: ', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
-  });
-  
+});
+
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./authMiddleware.js');
 const SECRET_KEY = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
 
 const userRoutes = require("./routes/user"); // Import your user routes
+const adminRoutes = require("./routes/admin"); // Import admin routes
 const authenticateToken = require("./middleware/authMiddleware"); // Import auth middleware
-app.use("/", userRoutes); 
+app.use("/", userRoutes);
+app.use("/api/admin", adminRoutes); // Add admin routes
 app.get("/user/:id", authenticateToken, async (req, res) => {
     const userId = req.params.id;
 
@@ -413,15 +347,15 @@ app.post("/verify-token", authenticateToken, (req, res) => {
     // If the token is valid, `req.user` will have the decoded JWT payload
     res.json(req.user); // Send the user data from the token payload
 });
-const Modify_UserData= require('./config/Modify_PersonalData');
-app.use("/api",Modify_UserData);
+const Modify_UserData = require('./config/Modify_PersonalData');
+app.use("/api", Modify_UserData);
 
 app.get('/dashboard', authMiddleware, (req, res) => {
     res.json({ message: `Welcome, ${req.user.email}` });
 });
 
 const ProductsRoute = require('./routes/ProductsRoute');
-app.use("/api/products",ProductsRoute);
+app.use("/api/products", ProductsRoute);
 
 
 app.post('/logout', async (req, res) => {
@@ -436,7 +370,7 @@ app.get("/", (req, res) => {
 });
 
 const addresses = require("./routes/AddressInfo");
-app.use("/api",addresses);
+app.use("/api", addresses);
 
 // Error handling for securing sensitive information about the DB
 app.use((req, res, next) => {

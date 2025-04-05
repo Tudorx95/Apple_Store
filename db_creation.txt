@@ -340,14 +340,13 @@ VALUES (
     'Admin', 
     'User', 
     'admin@example.com', 
-    'a3K2hQe3K98Cm35bOw68C5ShkGIKVhev6nYL8+EGlXSSdwuTPT37wC4tmNsfaUkZ', -- Replace with an actual hashed password
+    '$2b$10$mvflw9k/vEPwaH3g1Y74VeTQATMU1SAoN/3T6UdQKTdULoQR.5obS', -- Replace with an actual hashed password
     '+1234567890', 
     '123 Admin Street, Admin City', 
     2 -- The ID for 'admin' from user_types table
 );
 
-password encrpyted using openssl:
-openssl.exe enc -in .\text.txt -out text.enc -e -aes-128-ecb -pbkdf2 -md sha256 -pass pass:abracadabra -p -nosalt -base64
+Admin -> abracadabra (actual encrypted password)
 
 Tudor -> Magma28fr!
 

@@ -13,60 +13,86 @@ import ProductDetails from './pages/ProductDetails';
 import { ProductProvider } from './models/ProductContext';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './models/AuthProvider';
 import Cart from './pages/Cart';
 import TransactionPage from './pages/TransactionPage';
 
+// Define libraries array outside component to keep it static
+const libraries = ['places', 'marker'];
+
 function App() {
   const [loading, setLoading] = useState(true);
+  const [envError, setEnvError] = useState(null);
 
   useEffect(() => {
-    // Simulate a loading process (e.g., fetch data or initialize app)
+    // Check environment variables when component mounts
+    console.log('Checking environment variables...');
+    console.log('GOOGLE_MAPS_API_KEY:', process.env.REACT_APP_GOOGLE_MAPS_API_KEY ? 'Defined' : 'Undefined');
+
+    if (!process.env.REACT_APP_GOOGLE_MAPS_API_KEY) {
+      setEnvError('Google Maps API key is not defined in environment variables');
+      console.error('Google Maps API key is not defined in environment variables');
+    }
+
     setTimeout(() => {
       setLoading(false);
-    }, 2000); // Set the time according to your needs (in ms)
+    }, 2000);
   }, []);
 
-  return (
-
-    <Router>
-      <div className="app-container">
-      {loading ? (
-          <Loading /> // Show Loading component while loading
-        ) : (
-          <>
-          <AuthProvider>
-          <Navbar />
-          <LoadScript googleMapsApiKey="AIzaSyDF2NfsIYJbLAaBBvXj7dGD9vMOR1y53W0">
-            <main className="main-content">
-            <ProductProvider>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} /> {/* Add the new route */}
-                {/* Add other routes for MacBook, iPad, iPhone, and Service pages */}
-                <Route path="/macbook" element={<ProductsPage />} />
-                <Route path="/ipad" element={<ProductsPage />} />
-                <Route path="/iphone" element={<ProductsPage />} />
-                <Route path='/cart' element={<Cart />} />
-                <Route path="/service" element={<div>Service Page (Coming Soon)</div>} />
-                <Route path="/product/:deviceType/:productId" element={<ProductDetails />} />
-                <Route path='/order-confirmation' element={<TransactionPage />} />
-              </Routes>
-              </ProductProvider>
-            </main>
-            <Footer />
-            </LoadScript>
-          </AuthProvider>
-          </>
-        )}
+  if (envError) {
+    return (
+      <div style={{ padding: '20px', color: 'red' }}>
+        <h2>Environment Error</h2>
+        <p>{envError}</p>
+        <p>Please ensure your .env file is properly configured and the application has been restarted.</p>
       </div>
-    </Router>
-    
+    );
+  }
+
+  return (
+    <LoadScript
+      googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
+      libraries={libraries}
+      onLoad={() => console.log('Google Maps script loaded successfully')}
+      onError={(error) => console.error('Error loading Google Maps script:', error)}
+    >
+      <Router>
+        <div className="app-container">
+          {loading ? (
+            <Loading />
+          ) : (
+            <>
+              <AuthProvider>
+                <Navbar />
+                <main className="main-content">
+                  <ProductProvider>
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/register" element={<RegisterPage />} />
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/reset-password" element={<ResetPasswordPage />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/macbook" element={<ProductsPage />} />
+                      <Route path="/ipad" element={<ProductsPage />} />
+                      <Route path="/iphone" element={<ProductsPage />} />
+                      <Route path='/cart' element={<Cart />} />
+                      <Route path="/service" element={<div>Service Page (Coming Soon)</div>} />
+                      <Route path="/product/:deviceType/:productId" element={<ProductDetails />} />
+                      <Route path='/order-confirmation' element={<TransactionPage />} />
+                    </Routes>
+                  </ProductProvider>
+                </main>
+                <Footer />
+              </AuthProvider>
+            </>
+          )}
+        </div>
+      </Router>
+    </LoadScript>
   );
 }
 

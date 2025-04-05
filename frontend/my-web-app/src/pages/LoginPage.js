@@ -13,7 +13,7 @@ const LoginPage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetToken, setResetToken] = useState(new URLSearchParams(window.location.search).get('token'));
-  const {login} = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
 
@@ -28,7 +28,7 @@ const LoginPage = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: resetEmail }),
     });
-  
+
     const result = await response.json();
     if (response.ok) {
       console.log(result.message);
@@ -39,7 +39,7 @@ const LoginPage = () => {
       setResetStatus({ success: false, message: result.message });
     }
   };
-  
+
 
 
   const handleSubmit = async (e) => {
@@ -47,52 +47,52 @@ const LoginPage = () => {
 
     if (!formData.identifier || !formData.password) {
       setErrors({
-          identifier: !formData.identifier ? 'Email or phone is required' : '',
-          password: !formData.password ? 'Password is required' : ''
+        identifier: !formData.identifier ? 'Email or phone is required' : '',
+        password: !formData.password ? 'Password is required' : ''
       });
       return;
-  }
-   
-   try{
-    
-     const response = await fetch('/login', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify(formData),
+    }
+
+    try {
+
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok) {
         login(result.token, result.id); // Store in React Context
         navigate('/dashboard');
       } else {
         alert(result.message);
       }
-    }catch(error){
+    } catch (error) {
       console.error("Login error:", error);
-    } 
+    }
   };
 
-  const handleRegister=()=>{
+  const handleRegister = () => {
     navigate('/register');
   };
 
   // Handle reset password form submission
-const handleResetPassword = async (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
-  
+
     if (newPassword !== confirmPassword) {
       setResetStatus({ success: false, message: 'Passwords do not match' });
       return;
     }
-  
+
     const response = await fetch('/update-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ resetToken, newPassword }),
     });
-  
+
     const result = await response.json();
     if (response.ok) {
       //console.log(result.message);
@@ -103,7 +103,7 @@ const handleResetPassword = async (e) => {
     }
   };
 
-useEffect(() => {
+  useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") {
         setForgotPasswordOpen(false); // Close the search bar
@@ -114,7 +114,7 @@ useEffect(() => {
       document.removeEventListener("keydown", handleEscape);
     };
   }, []);
-  
+
   return (
     <div className="login-container">
       <div className="login-box">
@@ -161,64 +161,64 @@ useEffect(() => {
           </p>
         </form>
       </div>
-      
+
       {forgotPasswordOpen && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <h3>{showResetForm ? 'Reset Your Password' : 'Reset Password'}</h3>
-      <p>{showResetForm ? 'Enter your new password below.' : 'Enter your email to receive a temporary password.'}</p>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>{showResetForm ? 'Reset Your Password' : 'Reset Password'}</h3>
+            <p>{showResetForm ? 'Enter your new password below.' : 'Enter your email to receive a temporary password.'}</p>
 
-      {/* Email Input */}
-      {!showResetForm && (
-        <>
-          <input
-            type="email"
-            placeholder="your@email.com"
-            value={resetEmail}
-            onChange={(e) => setResetEmail(e.target.value)}
-          />
-          {resetStatus.message && (
-            <p className={resetStatus.success ? 'success-message' : 'error-message'}>
-              {resetStatus.message}
-            </p>
-          )}
-        </>
+            {/* Email Input */}
+            {!showResetForm && (
+              <>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                />
+                {resetStatus.message && (
+                  <p className={resetStatus.success ? 'success-message' : 'error-message'}>
+                    {resetStatus.message}
+                  </p>
+                )}
+              </>
+            )}
+
+            {/* New Password Fields */}
+            {showResetForm && (
+              <>
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                {resetStatus.message && (
+                  <p className={resetStatus.success ? 'success-message' : 'error-message'}>
+                    {resetStatus.message}
+                  </p>
+                )}
+              </>
+            )}
+
+            <div className="modal-buttons">
+              <button onClick={() => setForgotPasswordOpen(false)}>Cancel</button>
+              {!showResetForm ? (
+                <button onClick={handleForgotPassword}>Send</button>
+              ) : (
+                <button onClick={handleResetPassword}>Reset Password</button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
-
-      {/* New Password Fields */}
-      {showResetForm && (
-        <>
-          <input
-            type="password"
-            placeholder="New Password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Confirm New Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          {resetStatus.message && (
-            <p className={resetStatus.success ? 'success-message' : 'error-message'}>
-              {resetStatus.message}
-            </p>
-          )}
-        </>
-      )}
-
-      <div className="modal-buttons">
-        <button onClick={() => setForgotPasswordOpen(false)}>Cancel</button>
-        {!showResetForm ? (
-          <button onClick={handleForgotPassword}>Send</button>
-        ) : (
-          <button onClick={handleResetPassword}>Reset Password</button>
-        )}
-      </div>
-    </div>
-  </div>
-)}
 
     </div>
   );

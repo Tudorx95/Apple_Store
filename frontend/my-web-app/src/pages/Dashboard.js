@@ -6,64 +6,55 @@ import '../assets/css/Dashboard.css';
 import ModifyPersonalData from '../components/layout/PersonalData';
 import AddressManagement from '../components/layout/AddressMng';
 import MyOrders from '../components/layout/MyOrders';
+import RecentOrders from '../components/layout/RecentOrders';
+import AdminDashboard from '../components/layout/AdminDashboard';
 
 const Dashboard = () => {
   const { token, userId, logout } = useAuth(); // Get token and userId from context
   const [user, setUserData] = useState(null);
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeSection, setActiveSection] = useState('recent-orders');
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!token) {
-        navigate("/login"); // Redirect if not logged in
-        return;
+      navigate("/login"); // Redirect if not logged in
+      return;
     }
 
     // Fetch user details from backend
     const fetchUserData = async () => {
-        const response = await fetch(`/user/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+      const response = await fetch(`/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        if (response.ok) {
-            const data = await response.json();
-            setUserData(data);
-           // console.log(data);
-        } else {
-            logout(); // Logout if unauthorized
-            navigate("/login");
-        }
+      if (response.ok) {
+        const data = await response.json();
+
+        setUserData(data);
+        // console.log(data);
+      } else {
+        logout(); // Logout if unauthorized
+        navigate("/login");
+      }
     };
 
     fetchUserData();
-}, [token, userId, navigate, logout]);
-
-  
+  }, [token, userId, navigate, logout]);
 
   const renderSection = () => {
-    switch(activeSection) {
+    if (user?.user_type === 2) { // Check if user is admin
+      return <AdminDashboard />;
+    }
+
+    switch (activeSection) {
       case 'recent-orders':
-        return (
-          <div className="section-content">
-            <h2>Recent orders</h2>
-            <div className="empty-state">
-              <p>You have not placed any orders.</p>
-              <a href="/" className="go-to-home">Go to Home Page &gt;</a>
-            </div>
-          </div>
-        );
+        return <RecentOrders />;
       case 'personal-data':
-        return (
-          <ModifyPersonalData user={user}/>
-        );
+        return <ModifyPersonalData user={user} />;
       case 'address':
-        return (
-         <AddressManagement user={user}/>
-        );
+        return <AddressManagement user={user} />;
       case 'my-orders':
-        return (
-          <MyOrders />
-        );
+        return <MyOrders />;
       default:
         return null;
     }
@@ -82,6 +73,12 @@ const Dashboard = () => {
     return <div>Loading...</div>; // You can display a loading indicator while user data is being fetched
   }
 
+  // Return AdminDashboard directly for admin users
+
+  if (user.user_type === 2) {
+    return <AdminDashboard />;
+  }
+
   return (
     <div className="dashboard-page">
       {/* Combined sidebar container */}
@@ -94,30 +91,30 @@ const Dashboard = () => {
             <p>{user.email}</p>
           </div>
         </div>
-        
+
         {/* Navigation options */}
         <nav className="dashboard-nav">
           <ul>
             <li className={activeSection === 'recent-orders' ? 'active' : ''}
-                onClick={() => setActiveSection('recent-orders')}>
+              onClick={() => setActiveSection('recent-orders')}>
               Recent orders
             </li>
             <li className={activeSection === 'personal-data' ? 'active' : ''}
-                onClick={() => setActiveSection('personal-data')}>
+              onClick={() => setActiveSection('personal-data')}>
               Personal data
             </li>
             <li className={activeSection === 'address' ? 'active' : ''}
-                onClick={() => setActiveSection('address')}>
+              onClick={() => setActiveSection('address')}>
               Address
             </li>
             <li className={activeSection === 'my-orders' ? 'active' : ''}
-                onClick={() => setActiveSection('my-orders')}>
+              onClick={() => setActiveSection('my-orders')}>
               My orders
             </li>
           </ul>
         </nav>
       </div>
-      
+
       {/* Main content area */}
       <div className="dashboard-main">
         <div className="dashboard-centered-content">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../models/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import '../assets/css/Cart.css'
+import PaymentPortal from '../components/layout/PaymentPortal';
 
 const CartPage = () => {
   const { token, userId, isTokenExpired } = useAuth();
@@ -13,6 +14,8 @@ const CartPage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [couponCode, setCouponCode] = useState('');
   const [freeShipping, setFreeShipping] = useState(true);
+  const [showPayment, setShowPayment] = useState(false);
+  const [orderId, setOrderId] = useState(null);
 
   // Fetch cart items from the database
   const fetchCartItems = async () => {
@@ -31,30 +34,29 @@ const CartPage = () => {
 
       const orderId = localStorage.getItem("orderId");
       if (!orderId) {
-        
+
         return;
       }
 
       // Get the pending orders for the current user
-      const response = await fetch(`/api/products/${userId}/${orderId}`, {
+      const response = await fetch(`/api/products/${userId}/${orderId}?status=pending`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           alert("Session expired or invalid token!");
           navigate('/login');
           return;
         }
-        else if (response.status === 404)
-            {
-              //console.log(response.message);
-              localStorage.removeItem("orderId");
-              return;
-            }
-          //throw new Error('Failed to fetch cart items');
+        else if (response.status === 404) {
+          //console.log(response.message);
+          localStorage.removeItem("orderId");
+          return;
+        }
+        //throw new Error('Failed to fetch cart items');
       }
 
       const data = await response.json();
@@ -97,7 +99,7 @@ const CartPage = () => {
     try {
       const orderId = localStorage.getItem('orderId');
       const response = await fetch(`/api/products/Quantity/${userId}/${orderId}/${itemId}`, {
-        method: 'PATCH',  
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -141,8 +143,7 @@ const CartPage = () => {
       }
       console.log(cartItems.length);
       fetchCartItems();
-      if(cartItems.length === 0)
-      {
+      if (cartItems.length === 0) {
         localStorage.removeItem("orderId");
       }
       // Update local state
@@ -158,114 +159,73 @@ const CartPage = () => {
     }
   };
 
-  
- // Handle coupon code
-const handleCouponSubmit = async (e) => {
-  e.preventDefault();
-  
-  try {
-    const exists_coupon = localStorage.getItem('couponId');
-    if(exists_coupon)
-    {
-      alert("A coupon was already used!");
-      return;
-    }
 
-    const response = await fetch('/api/products/coupon/validate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ code: couponCode }),
-    });
+  // Handle coupon code
+  const handleCouponSubmit = async (e) => {
+    e.preventDefault();
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Invalid coupon code');
-    }
-
-    const data = await response.json();
-    console.log(data);
-    
-    // Calculate the discount amount
-    let discountAmount = 0;
-
-    if (data.discountType === 'percentage') {
-      discountAmount = (totalPrice * data.discountValue) / 100;
-
-      // Ensure it does not exceed max discount allowed
-      if (data.maxDiscount && discountAmount > data.maxDiscount) {
-        discountAmount = data.maxDiscount;
-      }
-    } else if (data.discountType === 'fixed_amount') {
-      discountAmount = data.discountValue;
-    }
-
-    // Ensure minimum purchase requirement is met
-    if (totalPrice < data.minPurchase) {
-      alert(`Coupon requires a minimum purchase of $${data.minPurchase}`);
-      return;
-    }
-    localStorage.setItem("couponId",couponCode);
-    // Calculate the new total price after applying the discount
-    const newTotal = totalPrice - discountAmount;
-
-    // Update total price state
-    setTotalPrice(newTotal);
-
-    alert(`Coupon applied! You saved $${discountAmount}!`);
-
-  } catch (err) {
-    setError(err.message);
-    setTimeout(() => setError(null), 3000);
-  }
-};
-
-  // Finalize order
-  const finalizeOrder = async () => {
-    // modify status in order_details, and the price
     try {
-      const nb_orders = cartItems.length;
-      if(nb_orders<1)
-      {
+      const exists_coupon = localStorage.getItem('couponId');
+      if (exists_coupon) {
+        alert("A coupon was already used!");
         return;
       }
-      const response = await fetch(`/api/address-delivery/${userId}/${nb_orders}`,{
-        method: 'GET',
+
+      const response = await fetch('/api/products/coupon/validate', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ code: couponCode }),
       });
+
       if (!response.ok) {
-        throw new Error('Error retrieving address ID');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Invalid coupon code');
       }
-      
+
       const data = await response.json();
-      const orderDetailsId = data.orderId;
-      
+      console.log(data);
 
-      // const orderDetailsResponse = await fetch('/api/order-details', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify({
-      //     user_id: userId,
-      //     nb_orders: cartItems.length,
-      //     address_delivery_id: 1, // Default address ID for now
-      //   }),
-      // });
+      // Calculate the discount amount
+      let discountAmount = 0;
 
-      // if (!orderDetailsResponse.ok) {
-      //   throw new Error('Failed to create order details');
-      // }
+      if (data.discountType === 'percentage') {
+        discountAmount = (totalPrice * data.discountValue) / 100;
 
-      //const orderDetails = await orderDetailsResponse.json();
+        // Ensure it does not exceed max discount allowed
+        if (data.maxDiscount && discountAmount > data.maxDiscount) {
+          discountAmount = data.maxDiscount;
+        }
+      } else if (data.discountType === 'fixed_amount') {
+        discountAmount = data.discountValue;
+      }
 
-      const updateOrdersResponse = await fetch('/api/products/finalize', {
+      // Ensure minimum purchase requirement is met
+      if (totalPrice < data.minPurchase) {
+        alert(`Coupon requires a minimum purchase of $${data.minPurchase}`);
+        return;
+      }
+      localStorage.setItem("couponId", couponCode);
+      // Calculate the new total price after applying the discount
+      const newTotal = totalPrice - discountAmount;
+
+      // Update total price state
+      setTotalPrice(newTotal);
+
+      alert(`Coupon applied! You saved $${discountAmount}!`);
+
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handlePaymentComplete = async (paymentData) => {
+    try {
+      // Update the order status to 'shipped' after successful payment
+      const response = await fetch('/api/products/finalize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -273,28 +233,66 @@ const handleCouponSubmit = async (e) => {
         },
         body: JSON.stringify({
           user_id: userId,
-          order_id: orderDetailsId,
+          order_id: paymentData.orderId,
           status: 'shipped',
         }),
       });
 
-      if (!updateOrdersResponse.ok) {
+      if (!response.ok) {
         throw new Error('Failed to finalize order');
       }
 
+      // Navigate to order confirmation
       navigate('/order-confirmation', {
         state: {
-          orderId: orderDetailsId,
-          totalAmount: totalPrice,
+          orderId: paymentData.orderId,
+          totalAmount: paymentData.totalAmount,
+        },
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const finalizeOrder = async () => {
+    try {
+      const nb_orders = cartItems.length;
+      if (nb_orders < 1) {
+        return;
+      }
+
+      const response = await fetch(`/api/address-delivery/${userId}/${nb_orders}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
+      if (!response.ok) {
+        throw new Error('Error retrieving address ID');
+      }
+
+      const data = await response.json();
+      const orderDetailsId = data.orderId;
+      setOrderId(orderDetailsId);
+      setShowPayment(true);
     } catch (err) {
       setError(err.message);
     }
   };
 
   if (loading) return <div className="text-center p-4">Loading your cart...</div>;
+
+  if (showPayment) {
+    return (
+      <PaymentPortal
+        orderId={orderId}
+        totalAmount={totalPrice}
+        onPaymentComplete={handlePaymentComplete}
+      />
+    );
+  }
 
   return (
     <div className="cart-page-container">
@@ -311,7 +309,7 @@ const handleCouponSubmit = async (e) => {
 
       <div className="finalize-order-top">
         <button onClick={finalizeOrder} className="btn-finalize">
-        Order completion
+          Order completion
         </button>
       </div>
 
@@ -377,7 +375,7 @@ const handleCouponSubmit = async (e) => {
 
       <div>
         <button className="btn-update-cart">
-        Update shopping cart
+          Update shopping cart
         </button>
       </div>
 
@@ -395,7 +393,7 @@ const handleCouponSubmit = async (e) => {
               placeholder="Cod cupon"
             />
             <button type="submit" className="btn-apply-coupon">
-            Apply
+              Apply
             </button>
           </form>
         </div>
@@ -407,7 +405,7 @@ const handleCouponSubmit = async (e) => {
 
         <div>
           <button onClick={finalizeOrder} className="btn-finalize-bottom">
-          Order completion
+            Order completion
           </button>
         </div>
       </div>
