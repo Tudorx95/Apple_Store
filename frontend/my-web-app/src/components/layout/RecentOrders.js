@@ -71,7 +71,13 @@ const RecentOrders = () => {
 
                 setOrders(allOrders);
             } catch (err) {
-                setError(err.message);
+                // Check if this is a "no orders" error based on status code or message
+                if (err.message.includes('No orders found') || err.message === 'Failed to fetch orders') {
+                    setOrders([]);
+                    setError('no_orders');
+                } else {
+                    setError(err.message);
+                }
             } finally {
                 setLoading(false);
             }
@@ -161,12 +167,12 @@ const RecentOrders = () => {
         );
     }
 
-    if (error) {
+    if (error && error !== 'no_orders') {
         return (
             <div className="my-orders-section-content">
                 <h2>Recent Orders</h2>
                 <div className="my-orders-error">
-                    <p>{error}</p>
+                    <p>An error occurred: {error}</p>
                 </div>
             </div>
         );

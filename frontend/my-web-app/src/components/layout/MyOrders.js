@@ -68,7 +68,13 @@ const MyOrders = () => {
 
         setOrders(allOrders);
       } catch (err) {
-        setError(err.message);
+        if (err.message.includes('No orders found') || err.message === 'Failed to fetch orders') {
+          setOrders([]);
+          setError('no_orders');
+        } else {
+          // Other errors
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -158,12 +164,12 @@ const MyOrders = () => {
     );
   }
 
-  if (error) {
+  if (error && error !== 'no_orders') {
     return (
       <div className="my-orders-section-content">
         <h2>My Orders</h2>
         <div className="my-orders-error">
-          <p>{error}</p>
+          <p>An error occurred: {error}</p>
         </div>
       </div>
     );

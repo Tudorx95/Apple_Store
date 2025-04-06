@@ -2,29 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import '../../assets/css/NavBar.css';
-import logo from '../../assets/logo_dynamic.gif'; // Add your logo image path here
-//import macbookIcon from '../../assets/images/macbook-icon.png'; // Add MacBook icon path here
-//import ipadIcon from '../../assets/images/ipad-icon.png'; // Add iPad icon path here
-//import iphoneIcon from '../../assets/images/iphone-icon.png'; // Add iPhone icon path here
-import searchIcon from '../../assets/searchLoop.png'; // Add search icon path here
-import personIcon from '../../assets/personIcon.jpg'; // Add person icon path here
-import cartIcon from '../../assets/cartIcon.png'; // Add cart icon path here
-import {useAuth} from '../../models/AuthProvider';
+import logo from '../../assets/logo_dynamic.gif';
+import searchIcon from '../../assets/searchLoop.png';
+import personIcon from '../../assets/personIcon.jpg';
+import cartIcon from '../../assets/cartIcon.png';
+import { useAuth } from '../../models/AuthProvider';
 
 const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(''); // State for search term
+  const [searchTerm, setSearchTerm] = useState('');
   const [authPopupOpen, setAuthPopupOpen] = useState(false);
-  //const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
   const { token, isTokenExpired, logout } = useAuth();
   
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+    if (mobileSearchOpen) setMobileSearchOpen(false);
+  };
+
+  const toggleMobileSearch = () => {
+    setMobileSearchOpen(!mobileSearchOpen);
+    if (menuOpen) setMenuOpen(false);
   };
 
   const scrollToTop = () => {
-    window.scrollTo(0, 0); // Scroll to the top of the page
+    window.scrollTo(0, 0);
   };
 
   const handleAuthClick = () => {
@@ -37,11 +40,10 @@ const NavBar = () => {
   
   const handleAuthenticate = () => {
     if (token && !isTokenExpired(token)) {
-      navigate("dashboard"); // Navigate to dashboard if the token is valid
-  } else {
-      //setIsAuthenticated(true);
+      navigate("dashboard");
+    } else {
       logout();
-      navigate("login"); // Otherwise, navigate to login
+      navigate("login");
     }
     setAuthPopupOpen(false);
   };
@@ -51,13 +53,12 @@ const NavBar = () => {
   };
   
   const handleLogout = () => {
-    logout(); // Call logout function to clear token
-    navigate('/'); // Redirect to homepage after logout
+    logout();
+    navigate('/');
     setAuthPopupOpen(false);
   };
 
-   // Handle ESC key press to close the pop-up
-   useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setAuthPopupOpen(false);
@@ -67,6 +68,19 @@ const NavBar = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Handle clicks outside of the menu to close it on mobile
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuOpen && !event.target.closest('.nav-menu') && 
+          !event.target.closest('.menu-icon')) {
+        setMenuOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     const productType = searchTerm.toLowerCase().includes('macbook')
@@ -75,10 +89,10 @@ const NavBar = () => {
       ? 'ipad'
       : searchTerm.toLowerCase().includes('iphone')
       ? 'iphone'
-      : 'macbook'; // Default to MacBook if no specific type is found
+      : 'macbook';
 
-    // Navigate to the product page with model filter as query parameter
     navigate(`/${productType}?model=${searchTerm}`);
+    setMobileSearchOpen(false);
   };
 
   return (
@@ -89,27 +103,52 @@ const NavBar = () => {
           <img src={logo} alt="Logo" className="navbar-logo-img" />
         </Link>
 
+        {/* Mobile Menu Icon */}
+        <div className="menu-icon" onClick={toggleMenu}>
+          <div className={`hamburger ${menuOpen ? 'active' : ''}`}>
+            <span className="line"></span>
+            <span className="line"></span>
+            <span className="line"></span>
+          </div>
+        </div>
+
         {/* Menu Items */}
         <div className={`nav-menu ${menuOpen ? 'active' : ''}`}>
-          <Link to="/macbook" className="nav-link" onClick={scrollToTop}>
+          <Link to="/macbook" className="nav-link" onClick={() => { scrollToTop(); setMenuOpen(false); }}>
             MacBook
           </Link>
-          <Link to="/ipad" className="nav-link" onClick={scrollToTop}>
+          <Link to="/ipad" className="nav-link" onClick={() => { scrollToTop(); setMenuOpen(false); }}>
             iPad
           </Link>
-          <Link to="/iphone" className="nav-link" onClick={scrollToTop}>
+          <Link to="/iphone" className="nav-link" onClick={() => { scrollToTop(); setMenuOpen(false); }}>
             iPhone
           </Link>
 
-          {/* Vertical Bar */}
+          {/* Vertical Bar - Only visible on desktop */}
           <div className="vertical-bar"></div>
 
           {/* Contact and Service Links */}
-          <Link to="/contact" className="nav-link" onClick={scrollToTop}>Contact</Link>
-          <Link to="/about" className="nav-link" onClick={scrollToTop}>About Us</Link>
+          <Link to="/contact" className="nav-link" onClick={() => { scrollToTop(); setMenuOpen(false); }}>Contact</Link>
+          <Link to="/about" className="nav-link" onClick={() => { scrollToTop(); setMenuOpen(false); }}>About Us</Link>
+          
+          {/* Mobile-only action buttons */}
+          <div className="mobile-actions">
+            <button className="mobile-action-btn search-mobile-btn" onClick={toggleMobileSearch}>
+              <img src={searchIcon} alt="Search" />
+              <span>Search</span>
+            </button>
+            <button className="mobile-action-btn" onClick={handleAuthClick}>
+              <img src={personIcon} alt="User" />
+              <span>Account</span>
+            </button>
+            <button className="mobile-action-btn" onClick={handleCart}>
+              <img src={cartIcon} alt="Cart" />
+              <span>Cart</span>
+            </button>
+          </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Desktop Action Buttons */}
         <div className="navbar-actions">
           <SearchBar onSearch={handleSearch} />
           <button className="user-btn" onClick={handleAuthClick}>
@@ -119,15 +158,27 @@ const NavBar = () => {
             <img src={cartIcon} alt="Cart" className="navbar-cart-icon" />
           </button>
         </div>
-
-        {/* Mobile Menu Icon */}
-        <div className="menu-icon" onClick={toggleMenu}>
-          <i className={menuOpen ? 'fas fa-times' : 'fas fa-bars'} />
-        </div>
       </div>
 
-        {/* Authentication Pop-up */}
-        {authPopupOpen && (
+      {/* Mobile Search Bar */}
+      {mobileSearchOpen && (
+        <div className="mobile-search-container">
+          <form onSubmit={handleSearch}>
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button type="submit">
+              <img src={searchIcon} alt="Search" />
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Authentication Pop-up */}
+      {authPopupOpen && (
         <div className="auth-popup-overlay" onClick={closeAuthPopup}>
           <div className="auth-popup" onClick={(e) => e.stopPropagation()}>
             {token && !isTokenExpired(token) ? (
