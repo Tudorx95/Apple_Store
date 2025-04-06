@@ -312,14 +312,10 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-const jwt = require('jsonwebtoken');
-const authMiddleware = require('./authMiddleware.js');
-const SECRET_KEY = process.env.JWT_SECRET;
-const REFRESH_SECRET = process.env.REFRESH_SECRET;
 
 const userRoutes = require("./routes/user"); // Import your user routes
 const adminRoutes = require("./routes/admin"); // Import admin routes
-const authenticateToken = require("./middleware/authMiddleware"); // Import auth middleware
+const authenticateToken = require("./middleware/authMiddleware.js"); // Import auth middleware
 app.use("/", userRoutes);
 app.use("/api/admin", adminRoutes); // Add admin routes
 app.get("/user/:id", authenticateToken, async (req, res) => {
@@ -350,7 +346,7 @@ app.post("/verify-token", authenticateToken, (req, res) => {
 const Modify_UserData = require('./config/Modify_PersonalData');
 app.use("/api", Modify_UserData);
 
-app.get('/dashboard', authMiddleware, (req, res) => {
+app.get('/dashboard', authenticateToken, (req, res) => {
     res.json({ message: `Welcome, ${req.user.email}` });
 });
 
