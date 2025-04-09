@@ -92,10 +92,20 @@ Regular users can access additional features like delivery scheduling and discou
 
 To install dependencies and run the application locally or for deployment, follow these steps:
 
+### Backend:
+
+```bash
+cd backend
+npm install
+npm run build    # for production
+npm start        # for development
+# Then just tap the password for the DB (11235)
+```
+
 #### Frontend:
 
 ```bash
-cd frontend
+cd frontend/my-web-app/
 npm install
 npm run build    # for production
 npm start        # for development
