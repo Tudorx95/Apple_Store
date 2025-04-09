@@ -89,6 +89,7 @@ router.get('/addresses/:userId', async (req,res)=>{
 
   router.get('/address-delivery/:userId/:nb_orders', async (req,res) =>{
     const {userId, nb_orders} = req.params;
+    console.log(userId, nb_orders);
     try{
       
       const [orderRows] = await db.promise().execute(`select id from order_details 

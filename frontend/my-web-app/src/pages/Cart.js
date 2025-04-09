@@ -256,11 +256,12 @@ const CartPage = () => {
 
   const finalizeOrder = async () => {
     try {
-      const nb_orders = cartItems.length;
+      const nb_orders = cartItems.reduce((total, item) => total + item.quantity, 0);
       if (nb_orders < 1) {
         return;
       }
-
+      console.log(nb_orders);
+      // aici trebuie calculat nb_orders pe baza quantities
       const response = await fetch(`/api/address-delivery/${userId}/${nb_orders}`, {
         method: 'GET',
         headers: {

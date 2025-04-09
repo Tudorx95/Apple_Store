@@ -29,6 +29,7 @@ router.post("/addToCart", async (req, res) => {
     else {
       // increment nb_orders 
       await connection.execute(`UPDATE order_details SET nb_orders = nb_orders + 1 WHERE id = ?`, [orderId]);
+      console.log("increasing nb_orders");
     }
 
     // identify if it is the same product
@@ -121,10 +122,29 @@ router.patch("/Quantity/:userId/:orderId/:itemId", async (req, res) => {
       [quantity, orderId, userId, itemId]
     );
 
+    
     // Check if any rows were affected
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Order not found or no changes made" });
     }
+
+    const [totalQuantity] = await db.promise().execute(
+      `SELECT SUM(quantity) as total 
+       FROM orders 
+       WHERE order_id = ? AND user_id = ?`,
+      [orderId, userId]
+    );
+
+    const [result2] = await db.promise().execute(
+      `UPDATE order_details
+       SET nb_orders = ?
+       WHERE id = ? AND user_id = ?`,
+      [totalQuantity[0].total, orderId, userId]
+    );
+    if(result2.affectedRows === 0){
+      return res.status(404).json({ message: "Order not found or no changes made" });
+    }
+
     res.status(200).json({ message: "Updated successfully" })
 
   } catch (error) {
@@ -163,6 +183,7 @@ router.delete(`/RemoveItem/:userId/:orderId/:itemId`, async (req, res) => {
     }
     // Check if the order exists
     const currentNbOrders = orderDetails[0].nb_orders;
+    console.log("currentNbOrders", currentNbOrders);
 
     // Only decrement if there are more than one item
     if (currentNbOrders > 1) {
@@ -173,7 +194,7 @@ router.delete(`/RemoveItem/:userId/:orderId/:itemId`, async (req, res) => {
         AND id = ?`,
         [userId, orderId]
       );
-      console.log(currentNbOrders);
+      console.log("Updating nb_orders", currentNbOrders);
     }
     else {
       await db.promise().execute(`DELETE FROM order_details WHERE user_id = ? && id = ?`, [userId, orderId]);

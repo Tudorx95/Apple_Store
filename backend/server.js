@@ -310,7 +310,7 @@ app.post('/api/register', async (req, res) => {
         console.error('Error registering user: ', error);
         return res.status(500).json({ message: 'Internal server error' });
     }
-});
+});``
 
 
 const userRoutes = require("./routes/user"); // Import your user routes

@@ -156,6 +156,20 @@ const AdminDashboard = () => {
         setFormData({ ...formData, [column]: item[column] });
     };
 
+    // New function to handle ID cell click to copy data for new item
+    const handleIdCellClick = (item) => {
+        // Create a copy of the item data without the ID fields
+        const newItemData = { ...item };
+        delete newItemData.ID;
+        delete newItemData.id;
+        
+        // Set the form data with the copied item data
+        setFormData(newItemData);
+        
+        // Show the add form
+        setShowAddForm(true);
+    };
+
     const handleCellUpdate = async (item) => {
         // Store the original value before attempting update
         const originalValue = item[editingCell.column];
@@ -346,7 +360,10 @@ const AdminDashboard = () => {
             <div className="table-container">
                 <div className="table-header">
                     <h2>{tables.find(t => t.id === activeTable)?.name}</h2>
-                    <button onClick={() => setShowAddForm(true)} className="add-button">
+                    <button onClick={() => {
+                        setFormData({});  // Clear form data when clicking Add New directly
+                        setShowAddForm(true);
+                    }} className="add-button">
                         Add New
                     </button>
                 </div>
@@ -365,7 +382,15 @@ const AdminDashboard = () => {
                         <tbody>
                             {tableData.map((item, index) => (
                                 <tr key={item.ID || item.id || index}>
-                                    {idColumn && <td className="id-cell">{item[idColumn]}</td>}
+                                    {idColumn && (
+                                        <td 
+                                            className="id-cell clickable-id" 
+                                            onClick={() => handleIdCellClick(item)}
+                                            title="Click to copy data for a new item"
+                                        >
+                                            {item[idColumn]}
+                                        </td>
+                                    )}
                                     {editableColumns.map(column => (
                                         <td
                                             key={column}
@@ -395,9 +420,11 @@ const AdminDashboard = () => {
                                     step={field === 'price' ? '0.01' : undefined}
                                     name={field}
                                     value={formData[field] || ''}
-                                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                                    onChange={handleInputChange}
                                     placeholder={`Enter ${formatColumnHeader(field).toLowerCase()}`}
+                                    className={formErrors[field] ? 'input-error' : ''}
                                 />
+                                {formErrors[field] && <div className="error-message">{formErrors[field]}</div>}
                             </div>
                         ))}
                         <div className="form-actions">
@@ -405,6 +432,7 @@ const AdminDashboard = () => {
                             <button className="cancel-btn" onClick={() => {
                                 setShowAddForm(false);
                                 setFormData({});
+                                setFormErrors({});
                             }}>Cancel</button>
                         </div>
                     </div>
@@ -467,22 +495,49 @@ const AdminDashboard = () => {
             .join(' ');
     };
 
-    // Add CSS for specifications display
-    const style = document.createElement('style');
-    style.textContent = `
-        .specifications-cell {
-            font-size: 0.9em;
-            line-height: 1.4;
-        }
-        .specifications-cell div {
-            margin: 2px 0;
-        }
-        .specifications-cell strong {
-            color: #666;
-            margin-right: 5px;
-        }
-    `;
-    document.head.appendChild(style);
+    // Add CSS for specifications display and for clickable ID cells
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.textContent = `
+            .specifications-cell {
+                font-size: 0.9em;
+                line-height: 1.4;
+            }
+            .specifications-cell div {
+                margin: 2px 0;
+            }
+            .specifications-cell strong {
+                color: #666;
+                margin-right: 5px;
+            }
+            .clickable-id {
+                cursor: pointer;
+                font-weight: bold;
+                color: #0366d6;
+                text-decoration: underline;
+            }
+            .clickable-id:hover {
+                background-color: #f0f8ff;
+            }
+            .input-error {
+                border: 1px solid #ff6b6b !important;
+                background-color: #fff0f0;
+            }
+            .error-message {
+                color: #ff6b6b;
+                font-size: 0.85em;
+                margin-top: 4px;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Cleanup function to remove the style when component unmounts
+        return () => {
+            if (document.head.contains(style)) {
+                document.head.removeChild(style);
+            }
+        };
+    }, []);
 
     const ErrorModal = ({ show, message, onClose }) => {
         if (!show) return null;
@@ -610,4 +665,4 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard; 
+export default AdminDashboard;

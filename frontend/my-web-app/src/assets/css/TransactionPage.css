@@ -1,3 +1,4 @@
+/* Container general */
 .transaction-container {
   display: flex;
   flex-direction: column;
@@ -8,6 +9,7 @@
   padding: 2rem;
 }
 
+/* Card de tranzacție */
 .transaction-card {
   background: white;
   border-radius: 20px;
@@ -176,21 +178,81 @@
   box-shadow: none;
 }
 
-/* Responsive adjustments */
+/* Responsivitate pentru telefon */
 @media (max-width: 640px) {
+  .transaction-container {
+    padding: 1rem; /* Reducem padding-ul general */
+  }
+
   .transaction-card {
     padding: 1.5rem;
+    max-width: 100%; /* Ocupă toată lățimea disponibilă */
+    margin: 0 0.5rem; /* Adăugăm un mic margin lateral */
   }
 
   .transaction-title {
-    font-size: 2rem;
+    font-size: 1.8rem; /* Reducem titlul */
+    margin-bottom: 1rem;
+  }
+
+  .transaction-success-icon {
+    font-size: 3rem; /* Reducem iconița */
+    margin-bottom: 1rem;
+  }
+
+  .transaction-details {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .transaction-detail-item {
+    font-size: 1rem; /* Reducem fontul detaliilor */
+    flex-direction: column; /* Stivuim eticheta și valoarea */
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .transaction-actions {
+    flex-direction: column; /* Stivuim butoanele */
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .transaction-button {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    width: 100%; /* Butoanele ocupă toată lățimea */
   }
 
   .payment-portal {
     padding: 1.5rem;
+    margin-top: 1rem;
+    max-width: 100%; /* Ocupă toată lățimea disponibilă */
+    margin: 0 0.5rem;
+  }
+
+  .payment-title {
+    font-size: 1.5rem; /* Reducem titlul */
+    margin-bottom: 1rem;
+  }
+
+  .payment-form {
+    gap: 0.75rem; /* Reducem spațierea între elemente */
+  }
+
+  .payment-input {
+    padding: 0.7rem;
+    font-size: 0.9rem;
   }
 
   .payment-row {
-    flex-direction: column;
+    flex-direction: column; /* Stivuim câmpurile expiryDate și cvv */
+    gap: 0.75rem;
   }
-} 
+
+  .payment-button {
+    padding: 0.8rem;
+    font-size: 1rem;
+    margin-top: 0.75rem;
+  }
+}
