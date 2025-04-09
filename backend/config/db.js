@@ -14,7 +14,7 @@ const bcrypt = require('bcryptjs');
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
-    password: "11235",  // Use the entered password
+    password: password,  // Use the entered password
     database: process.env.DB_NAME,
     waitForConnections: true, 
     connectionLimit: 10,

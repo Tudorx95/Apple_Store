@@ -44,7 +44,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
         { id: user[0].id, email: user[0].email, user_type: user[0].user_type },
         process.env.JWT_SECRET,
-        { expiresIn: "15m" } // Short-lived token
+        { expiresIn: "1h" } // Short-lived token
     );
 
     const refreshToken = jwt.sign(
